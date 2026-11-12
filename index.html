@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Crossfire 40K</title>
+<meta name="description" content="Locale vs locale Warhammer 40,000 league: pairings, results, standings, army lists and history.">
+<meta name="theme-color" content="#14181d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Crossfire">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2314181d'/%3E%3Cpath d='M20 14h24v8a12 12 0 0 1-24 0z' fill='%23d9a440'/%3E%3Cpath d='M28 34h8v8h6v6H22v-6h6z' fill='%23d9a440'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0} img{max-width:100%} [hidden]{display:none!important}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Dark only. Layout: a field-order sheet. Masthead with event picker + team score, tab strip, one working panel per tab. Locale A = steel, Locale B = oxide. */
+:root{
+  --bg:#14181d; --surface:#1c2128; --sunk:#232930; --line:#3c4550; --fg:#f0f3f6; --muted:#b9c2cc;
+  --accent:#d9a440; --accent-ink:#1a1408;
+  --a:#7fb0de; --a-soft:#1f3042; --b:#e08a73; --b-soft:#3d2620;
+  --win:#5cc189; --loss:#ec7d6d; --draw:#d4bf6a; --mission:#2a2318; color-scheme:dark;
+  --display:"Saira Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{font-size:18px}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:1rem;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(2rem,6vw,3rem);text-transform:uppercase}
+h2{font-size:1.5rem;text-transform:uppercase}
+h3{font-size:1.15rem}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.eyebrow{font-family:var(--display);text-transform:uppercase;letter-spacing:.12em;font-size:0.85rem;color:var(--accent);font-weight:600}
+.banner{background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:.9rem}
+.banner[data-tone="warn"]{border-color:var(--accent)}
+#banner{margin-bottom:16px}
+
+.mast{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;padding-bottom:18px;border-bottom:2px solid var(--fg)}
+.mast .meta{color:var(--muted);margin-top:6px;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}
+.picker{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.picker select{width:auto;max-width:100%}
+.score{display:grid;grid-template-columns:auto auto auto;align-items:center;gap:6px 14px;text-align:center}
+.score .side{font-family:var(--display);text-transform:uppercase;font-weight:600;font-size:.95rem;letter-spacing:.06em}
+.score .big{font-family:var(--display);font-size:3rem;font-weight:700;line-height:1}
+.score .vs{font-family:var(--display);color:var(--muted);font-size:1rem}
+.ca{color:var(--a)} .cb{color:var(--b)}
+.score .sub{grid-column:1/-1;font-size:0.85rem;color:var(--muted)}
+.mast>*{min-width:0}
+td.num{white-space:nowrap}
+.cross thead th,.cross th[scope="row"]{text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.95rem;font-weight:600}
+.cross th.xb{color:var(--b)} .cross th.xa{color:var(--a)}
+.cross th .muted{font-weight:400}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.picker select{min-width:0;flex:1 1 220px}
+
+
+nav.tabs{display:flex;gap:2px;margin:18px 0 22px;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs a{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-weight:600;font-size:1rem;padding:10px 14px;color:var(--muted);text-decoration:none;border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--fg);border-bottom-color:var(--accent)}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+section[data-view]{display:grid;gap:22px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px}
+
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;font-size:0.85rem;color:var(--muted);font-weight:600}
+.cross td,.cross th{text-align:center;border:1px solid var(--line)}
+.cross th[scope="row"]{text-align:left}
+.cross .cell{display:grid;gap:2px;justify-items:center;min-width:92px}
+.rd{font-size:0.85rem;color:var(--muted);font-family:var(--display);letter-spacing:.08em;text-transform:uppercase}
+.res{font-family:var(--mono);font-weight:500}
+.pill{display:inline-block;font-family:var(--display);font-weight:700;font-size:0.85rem;letter-spacing:.08em;padding:1px 7px;border-radius:3px;text-transform:uppercase;white-space:nowrap}
+.pill.W{background:var(--win);color:var(--surface)} .pill.L{background:var(--loss);color:var(--surface)} .pill.D{background:var(--draw);color:var(--surface)} .pill.P{background:var(--sunk);color:var(--muted)}
+.pill.live{background:var(--accent);color:var(--accent-ink)}
+.tag{display:inline-block;font-family:var(--display);font-weight:600;font-size:0.85rem;letter-spacing:.1em;padding:1px 6px;border-radius:3px;text-transform:uppercase;vertical-align:middle}
+.tag.A{background:var(--a-soft);color:var(--a)} .tag.B{background:var(--b-soft);color:var(--b)}
+.first{display:inline-block;font-family:var(--display);font-weight:700;font-size:0.85rem;letter-spacing:.08em;padding:0 5px;border:1px solid var(--accent);color:var(--accent);border-radius:3px;text-transform:uppercase;vertical-align:middle}
+
+.round-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.round-tabs button{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-weight:600;font-size:.95rem;padding:6px 14px;border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.round-tabs button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.games{display:grid;gap:12px}
+.game{display:grid;grid-template-columns:56px 1fr auto 1fr;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.game .tbl{font-family:var(--display);text-transform:uppercase;font-size:0.85rem;letter-spacing:.08em;color:var(--muted);line-height:1.1}
+.game .tbl b{display:block;font-size:1.6rem;color:var(--fg)}
+.pl{min-width:0}
+.pl .nm{font-weight:600;overflow-wrap:break-word;word-break:normal}
+.pl .fx{font-size:.85rem;color:var(--muted);overflow-wrap:break-word}
+.pl.right{text-align:right}
+.mid{display:grid;justify-items:center;gap:6px}
+.mid .vp{font-family:var(--mono);font-size:1.5rem;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.mid .vp.win-a .va,.mid .vp.win-b .vb{color:var(--win)}
+.entry{display:flex;gap:6px;align-items:center}
+.entry input{width:72px;text-align:center;-moz-appearance:textfield}
+.entry input::-webkit-outer-spin-button,.entry input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.firstpick{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.chk{display:inline-flex;flex-direction:row;align-items:center;gap:6px;color:var(--fg);font-size:.9rem;cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.game-foot{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;font-size:.85rem}
+.bye{grid-column:1/-1;color:var(--muted)}
+.game.notbl{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+@media (max-width:600px){.game{grid-template-columns:1fr auto 1fr}.game .tbl{grid-column:1/-1;display:flex;gap:6px;align-items:baseline}.game .tbl b{display:inline;font-size:1.1rem}}
+.mission{display:grid;gap:4px;background:var(--mission);color:var(--fg);border:1px solid var(--accent);border-left:6px solid var(--accent);border-radius:6px;padding:14px 18px}
+.mission .ml{font-family:var(--display);text-transform:uppercase;letter-spacing:.14em;font-size:.85rem;font-weight:600;color:var(--accent)}
+.mission .mn{font-family:var(--display);text-transform:uppercase;font-weight:700;font-size:clamp(1.6rem,5vw,2.4rem);line-height:1.05;overflow-wrap:anywhere;text-wrap:balance}
+
+input[type=text],input[type=number],input[type=date],textarea,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+input[type=number]{font-family:var(--mono)}
+textarea{font-family:var(--mono);font-size:.85rem;min-height:220px;resize:vertical}
+label{display:grid;gap:4px;font-size:.85rem;color:var(--muted)}
+.btn{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-weight:600;font-size:.92rem;padding:7px 14px;border-radius:4px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{border-color:var(--loss);color:var(--loss)}
+.btn.small{font-size:0.85rem;padding:4px 10px}
+.btn:disabled{opacity:.5;cursor:default}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.form{display:grid;gap:14px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.status{font-size:.85rem;color:var(--muted)}
+
+.stand td:nth-child(n+4),.stand th:nth-child(n+4){text-align:right}
+.stand .rank{font-family:var(--display);font-size:1.3rem;font-weight:700;width:36px}
+.stand tr.first-place .rank{color:var(--accent)}
+.tb{font-size:0.85rem;color:var(--muted)}
+ol.rules{margin:0;padding-left:20px;display:grid;gap:4px}
+.hist td:nth-child(n+2),.hist th:nth-child(n+2){text-align:right}
+
+.lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.listcard{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;display:grid;gap:10px;min-width:0;align-content:start}
+.listcard .hd{display:flex;justify-content:space-between;gap:8px;align-items:start}
+.listcard pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:0.85rem;background:var(--sunk);padding:10px;border-radius:4px;max-height:340px;overflow:auto}
+.listtext summary{cursor:pointer;font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;font-weight:600;color:var(--accent);padding:6px 0}
+.listtext[open] summary{margin-bottom:8px}
+.authbar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:flex-end;margin-bottom:12px;font-size:.95rem}
+.authbar:empty{display:none}
+#signin{margin-bottom:16px}
+#signin #googleBtn{justify-self:start}
+input[type=email],input[type=password]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:7px 9px;width:100%}
+.accts{display:grid;gap:10px}
+.acct{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--sunk)}
+.acct select{width:auto;max-width:100%}
+@media (max-width:640px){.acct{grid-template-columns:minmax(0,1fr)}.authbar{justify-content:flex-start}}
+.trophy{display:grid;gap:6px;padding:18px 20px;border:1px solid var(--accent);border-left:6px solid var(--accent);border-radius:6px;background:var(--mission)}
+.trophy .tname{font-family:var(--display);text-transform:uppercase;font-weight:700;font-size:clamp(2rem,7vw,2.8rem);line-height:1.05;overflow-wrap:break-word}
+.trophy .tsub{color:var(--muted)}
+.rdice{display:inline-block;white-space:nowrap;font-family:var(--display);font-weight:700;font-size:0.85rem;letter-spacing:.06em;padding:0 6px;border-radius:3px;text-transform:uppercase;vertical-align:middle;background:var(--b-soft);color:var(--b);border:1px dashed var(--b)}
+.rstar{color:var(--b);font-family:var(--mono);font-weight:700;font-size:1.15rem;margin-left:3px;letter-spacing:.05em}
+.fxpick label{flex:1 1 140px;min-width:0}
+.disp{font-family:var(--display);font-weight:600;font-size:.95rem;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);line-height:1.2;margin:2px 0}
+.rickypick{border-top:1px dashed var(--line);padding-top:8px}
+.rdq{flex-basis:100%;color:var(--muted);font-size:.9rem}
+.steps{margin:0;padding-left:24px;display:grid;gap:10px;max-width:70ch}
+.steps li::marker{font-family:var(--display);font-weight:700;color:var(--accent)}
+.hl{color:var(--accent)}
+.ex th,.ex td{white-space:nowrap}
+.tbd{display:grid;gap:8px}
+.tbrow{border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:var(--sunk)}
+.tbrow summary{cursor:pointer;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.tbrow summary .muted{white-space:nowrap}
+.tbrow .rank{font-family:var(--display);font-weight:700;font-size:1.1rem;min-width:28px}
+.tbkv{margin-top:10px;grid-template-columns:minmax(0,10em) minmax(0,1fr);gap:8px 14px}
+.tbtag{color:var(--accent)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:.88rem;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
+.empty{color:var(--muted);font-size:.9rem;font-style:italic}
+.confirm{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--b-soft);padding:8px 10px;border-radius:4px}
+.lockrow{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.lockbadge{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-weight:600;font-size:0.85rem;padding:3px 8px;border-radius:3px;background:var(--sunk);color:var(--muted)}
+.lockbadge.on{background:var(--fg);color:var(--bg)}
+.switch{display:inline-flex;flex-direction:row;align-items:center;gap:8px;cursor:pointer;color:var(--fg);font-size:.9rem}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch .track{width:42px;height:24px;border-radius:12px;background:var(--line);position:relative;flex:none}
+.switch .knob{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--surface);transition:left .15s}
+.switch input:checked+.track{background:var(--accent)}
+.switch input:checked+.track .knob{left:21px}
+.switch input:focus-visible+.track{outline:2px solid var(--accent);outline-offset:2px}
+
+.events{display:grid;gap:10px}
+.evrow{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.evdate{font-family:var(--display);text-transform:uppercase;text-align:center;line-height:1;min-width:52px}
+.evdate b{display:block;font-size:1.7rem}
+.evdate span{font-size:0.85rem;letter-spacing:.08em;color:var(--muted)}
+.evrow .nm{font-weight:600;overflow-wrap:anywhere}
+.evrow[aria-current="true"]{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent)}
+.roster{display:grid;gap:8px}
+.rrow{display:grid;grid-template-columns:1fr 150px auto auto;gap:8px;align-items:center}
+@media (max-width:560px){.rrow{grid-template-columns:1fr 1fr}}
+.pickcol{display:grid;gap:6px}
+.sched{display:grid;gap:12px}
+.sched .rnd{display:grid;gap:6px}
+.sched .trow{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:8px;align-items:center}
+@media (prefers-reduced-motion:no-preference){.btn,.round-tabs button,nav.tabs a{transition:background .15s,color .15s,border-color .15s}}
+@media (max-width:640px){
+  h1{font-size:1.9rem}
+  .picker .eyebrow{display:none}
+  .score .big{font-size:2.3rem}
+  nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin:14px 0 18px;overflow:visible}
+  nav.tabs{column-gap:4px}
+  nav.tabs a{padding:10px 0;text-align:center;font-size:.85rem;letter-spacing:0}
+  th,td{padding:8px 6px}
+  .entry input{width:96px;font-size:1.4rem;padding:8px 6px}
+  .chk input{width:24px;height:24px}
+  .chk{font-size:1rem;padding:4px 0}
+  .btn{padding:10px 16px}
+  input[type=text],input[type=date],select{padding:10px}
+  .hide-sm{display:none}
+  .round-tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));width:100%}
+  .round-tabs button{padding:8px 4px;letter-spacing:.03em}
+  .panel-head{display:grid}
+  .panel{padding:14px}
+  .wrap{padding-block:14px 40px}
+  .mast{grid-template-columns:minmax(0,1fr)}
+  .game,.game.editing{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .game .mid{grid-column:1/-1;grid-row:3;padding:4px 0;border-top:1px solid var(--line)}
+  .game .bye{grid-column:1/-1!important}
+  .game.notbl{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .game.notbl .mid{grid-row:2}.score{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);width:100%;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px}.score .side{overflow-wrap:anywhere;font-size:.9rem;line-height:1.2}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div id="banner" class="banner" hidden></div>
+
+  <div class="authbar" id="authbar"></div>
+  <div class="panel form" id="signin" hidden>
+    <div class="panel-head"><h2>Sign in</h2><span class="muted">Only needed to enter results or submit a list. Anyone can view without signing in.</span></div>
+    <button class="btn primary" type="button" id="googleBtn">Continue with Google</button>
+    <div class="muted" style="text-align:center">or use email</div>
+    <div class="grid2">
+      <label>Email<input type="email" id="au_email" autocomplete="email"></label>
+      <label>Password<input type="password" id="au_pass" autocomplete="current-password"></label>
+      <label>Your name (new accounts only)<input type="text" id="au_name" maxlength="40" autocomplete="name"></label>
+    </div>
+    <div class="actions"><button class="btn primary" type="button" id="emailIn">Sign in</button><button class="btn" type="button" id="emailUp">Create account</button><button class="btn" type="button" id="emailReset">Forgot password</button></div>
+    <div class="status" id="authStatus" role="status"></div>
+  </div>
+  <header class="mast">
+    <div>
+      <div class="picker"><span class="eyebrow">Warhammer 40,000 · Locale vs locale</span><select id="evPick" aria-label="Choose event"></select></div>
+      <h1 id="evName">Crossfire 40K</h1>
+      <div class="meta"><span id="evStatus"></span><span id="evDate"></span><span id="evVenue"></span><span id="evSize"></span></div>
+    </div>
+    <div class="score" aria-label="Team score">
+      <div class="side ca" id="sA">Locale A</div><div></div><div class="side cb" id="sB">Locale B</div>
+      <div class="big ca num" id="wA">0</div><div class="vs">vs</div><div class="big cb num" id="wB">0</div>
+      <div class="sub" id="scoreSub">Game wins</div>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="#overview" data-tab="overview">Overview</a>
+    <a href="#pairings" data-tab="pairings">Pairings</a>
+    <a href="#standings" data-tab="standings">Standings</a>
+    <a href="#lists" data-tab="lists">Lists</a>
+    <a href="#events" data-tab="events">Events</a>
+    <a href="#history" data-tab="history">History</a>
+    <a href="#setup" data-tab="setup" id="setupTab" hidden>Setup</a>
+  </nav>
+
+  <section data-view="overview">
+    <div class="panel" id="addrPanel" hidden>
+      <div class="panel-head"><h2>Location</h2></div>
+      <div style="display:grid;gap:8px">
+        <div><b id="addrVenue"></b><div id="addrText" style="user-select:all;overflow-wrap:anywhere"></div></div>
+        <div class="actions"><a class="btn primary" id="mapLink" target="_blank" rel="noopener">Open in Maps</a><button class="btn" type="button" id="copyAddr">Copy address</button><span class="status" id="copyStatus"></span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Cross table</h2><span class="muted" id="crossSub"></span></div>
+      <div class="scroll"><table class="cross" id="cross"></table></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Event notes</h2></div>
+      <div id="notes" class="muted">No notes yet.</div>
+    </div>
+  </section>
+
+  <section data-view="pairings" hidden>
+    <div class="panel-head"><h2>Pairings</h2><div class="round-tabs" id="roundTabs"></div></div>
+    <div class="mission" id="missionLine" hidden></div>
+    <div class="games" id="games"></div>
+  </section>
+
+  <section data-view="standings" hidden>
+    <div class="panel">
+      <div class="panel-head"><h2>Individual standings</h2><span class="muted" id="standSub"></span></div>
+      <div class="scroll"><table class="stand" id="stand"></table></div>
+      <p class="muted" style="margin:10px 0 0;font-size:.9rem"><span class="rstar">*</span> = accused of using Ricky Dice, one per game. <b>Pts</b> = record points. <b>Quality</b> = quality of wins. <b>Margin</b> = capped margin (each game capped at &plusmn;20). Full details below.</p>
+    </div>
+
+    <div class="panel rulesbox">
+      <div class="panel-head"><h2>How rankings work</h2><span class="muted">Applied in this order. Each step is only used if players are still tied.</span></div>
+      <ol class="steps">
+        <li><b>Record.</b> Win = 3 points, draw = 1, loss = 0. Most points ranks highest. A win is worth three draws, so playing for the win pays off.</li>
+        <li><b>Head-to-head.</b> If exactly two players are tied and they played each other, the winner of that game ranks higher.</li>
+        <li><b>Quality of wins.</b> Add up the final record points of every opponent you <i>beat</i>, plus half for any opponent you drew. Beating stronger opponents counts for more. <span class="hl">No VP or margins are used in this step.</span></li>
+        <li><b>Capped margin.</b> Your VP margin in each game, capped at &plusmn;20, added together. A close win still beats a loss, but a 60-point blowout counts the same as a 20-point win. This keeps armies that naturally run up the score from winning ties on that alone.</li>
+        <li><b>Result vs. strongest opponent.</b> Your result against the highest-placed opponent you faced. Win beats draw beats loss. Same result: the capped margin of that one game decides it.</li>
+        <li><b>Wins going second.</b> Wins where your opponent took the first turn. Needs "went first" ticked when results are entered.</li>
+        <li><b>Shared place.</b> Still level after all of that: the players share the place.</li>
+      </ol>
+      <h3 style="margin-top:18px">Example: quality of wins</h3>
+      <p class="muted" style="margin:6px 0 10px">Two players both finish 2-1 against the same three opponents.</p>
+      <div class="scroll"><table class="ex">
+        <thead><tr><th>Opponent</th><th>Opponent's final record</th><th>Player 1</th><th>Player 2</th></tr></thead>
+        <tbody>
+          <tr><td>Opponent A</td><td class="num">2-1 (6 pts)</td><td><span class="pill W">Win</span></td><td><span class="pill L">Loss</span></td></tr>
+          <tr><td>Opponent B</td><td class="num">1-2 (3 pts)</td><td><span class="pill W">Win</span></td><td><span class="pill W">Win</span></td></tr>
+          <tr><td>Opponent C</td><td class="num">0-3 (0 pts)</td><td><span class="pill L">Loss</span></td><td><span class="pill W">Win</span></td></tr>
+          <tr><td><b>Quality of wins</b></td><td></td><td class="num"><b>6 + 3 = 9</b></td><td class="num"><b>3 + 0 = 3</b></td></tr>
+        </tbody></table></div>
+      <p style="margin:10px 0 0">Player 1 ranks higher: their wins came against stronger opponents. The scores in those games don't matter for this step.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Tiebreak details</h2><span class="muted">The numbers behind every step, for every player</span></div>
+      <div id="tbDetails" class="tbd"></div>
+    </div>
+  </section>
+
+  <section data-view="lists" hidden>
+    <div class="panel-head"><h2>Army lists</h2><div class="lockrow"><span class="lockbadge" id="lockBadge">Lists open for edits</span><label class="switch" id="lockSwitch" hidden><input type="checkbox" id="lockToggle" role="switch"><span class="track" aria-hidden="true"><span class="knob"></span></span><span>Lock lists</span></label><span class="status" id="lockStatus"></span></div></div>
+    <div id="myList"></div>
+    <div class="lists" id="lists"></div>
+  </section>
+
+  <section data-view="events" hidden>
+    <div class="panel-head"><h2>Events</h2><span class="actions"><span class="muted">Tap an event to view it</span><button class="btn primary" type="button" id="newEventBtn2" hidden>New event</button></span></div>
+    <div class="events" id="eventList"></div>
+  </section>
+
+  <section data-view="history" hidden>
+    <div class="trophy" id="trophy"></div>
+    <div class="panel">
+      <div class="panel-head"><h2>All-time</h2><span class="muted" id="histSub"></span></div>
+      <div class="grid2" id="histTop"></div>
+    </div>
+    <div class="round-tabs" id="histTabs" role="tablist">
+      <button type="button" data-htab="records" aria-pressed="true">Records</button>
+      <button type="button" data-htab="margins" aria-pressed="false">Margins</button>
+      <button type="button" data-htab="log" aria-pressed="false">Game log</button>
+      <button type="button" data-htab="ricky" aria-pressed="false">Ricky Dice</button>
+    </div>
+    <div class="panel" data-hpanel="records">
+      <div class="panel-head"><h2>Player records</h2></div>
+      <div class="scroll"><table class="hist" id="histPlayers"></table></div>
+    </div>
+    <div class="panel" data-hpanel="margins" hidden>
+      <div class="panel-head"><h2>Actual margins</h2><span class="muted">Raw VP margins, no cap. Not used for rankings.</span></div>
+      <div class="grid2" id="marginTop" style="margin-bottom:14px"></div>
+      <div class="scroll"><table class="hist" id="histMargins"></table></div>
+      <p class="muted" style="margin:10px 0 0;font-size:.9rem">Margin = your VP minus your opponent's VP. <b>Avg win</b> is your average margin in games you won. <b>20+ wins</b> counts wins by more than the &plusmn;20 cap used in standings.</p>
+    </div>
+    <div class="panel" data-hpanel="ricky" hidden>
+      <div class="panel-head"><h2>Ricky Dice record</h2><span class="muted">Every game where someone was accused, win or lose</span></div>
+      <div class="scroll" style="margin-bottom:16px"><table class="hist" id="rickySum"></table></div>
+      <div class="scroll"><table id="rickyLog"></table></div>
+    </div>
+    <div class="panel" data-hpanel="log" hidden>
+      <div class="panel-head"><h2>Game log</h2></div>
+      <div class="grid2" style="margin-bottom:12px">
+        <label>Player<select id="hP1"></select></label>
+        <label>Opponent<select id="hP2"></select></label>
+      </div>
+      <div id="h2h" class="banner" hidden style="margin-bottom:12px"></div>
+      <div class="scroll"><table id="histLog"></table></div>
+    </div>
+  </section>
+
+  <section data-view="setup" hidden>
+    <div class="panel form">
+      <div class="panel-head"><h2>Events</h2><span class="muted">Only you see this tab</span></div>
+      <div class="actions"><button class="btn primary" type="button" id="newEventBtn">New event</button><button class="btn" type="button" id="pastEventBtn">Add past event</button><button class="btn" type="button" id="makeCurrent">Show this event first for everyone</button><span class="status" id="evActStatus"></span></div>
+      <div class="actions" id="delArea"><button class="btn danger" type="button" id="delEvent">Delete this event</button></div>
+    </div>
+
+    <form class="panel form" id="detailForm">
+      <h2>Event details</h2>
+      <div class="grid2">
+        <label>Event name<input type="text" id="f_name" maxlength="80"></label>
+        <label>Date<input type="date" id="f_date"></label>
+        <label>Status<select id="f_status"><option value="upcoming">Upcoming</option><option value="live">Live</option><option value="complete">Complete</option></select></label>
+        <label>Points limit<input type="number" id="f_points" min="0" step="5"></label>
+        <label class="chk" style="align-self:end"><input type="checkbox" id="f_tables">Show table numbers</label>
+        <label>Venue<input type="text" id="f_venue" maxlength="120"></label>
+        <label>Address<input type="text" id="f_address" maxlength="200"></label>
+      </div>
+      <div class="grid2" id="missionFields"></div>
+      <label>Event notes (schedule, terrain, rules pack)<textarea id="f_notes" style="min-height:120px;font-family:var(--body);font-size:.92rem"></textarea></label>
+      <div class="actions"><button class="btn primary" type="submit">Save details</button><span class="status" id="detailStatus"></span></div>
+    </form>
+
+    <div class="panel form" id="schedPanel">
+      <h2>Players and pairings</h2>
+      <p class="muted" style="margin:0">Pick who's playing from each locale, then generate the schedule. Everyone faces the other locale. With uneven sides, the bigger side rotates byes. You can change any table by hand before saving.</p>
+      <div class="grid2" id="pickPlayers"></div>
+      <div class="actions"><label style="display:flex;flex-direction:row;align-items:center;gap:8px">Rounds<input type="number" id="f_rounds" min="1" max="12" style="width:80px"></label><button class="btn" type="button" id="genBtn">Generate schedule</button></div>
+      <div class="sched" id="schedEdit"></div>
+      <div class="actions"><button class="btn primary" type="button" id="saveSched">Save players and pairings</button><span class="status" id="schedStatus"></span></div>
+    </div>
+
+    <div class="panel form" id="acctPanel" hidden>
+      <div class="panel-head"><h2>Player accounts</h2><span class="muted">People who signed in. Approve them and link each to their player.</span></div>
+      <p class="muted" style="margin:0">Approved players can enter results and submit their own list. Nobody else can change anything.</p>
+      <div class="accts" id="acctRows"></div>
+      <div class="status" id="acctStatus"></div>
+    </div>
+
+    <div class="panel form">
+      <h2>Roster</h2>
+      <div class="grid2">
+        <label>Locale A name<input type="text" id="f_la" maxlength="40"></label>
+        <label>Locale B name<input type="text" id="f_lb" maxlength="40"></label>
+      </div>
+      <div class="actions"><button class="btn" type="button" id="saveLocales">Save locale names</button><span class="status" id="localeStatus"></span></div>
+      <div class="roster" id="rosterRows"></div>
+      <div class="rrow"><input type="text" id="newName" placeholder="New player name" maxlength="40" aria-label="New player name"><select id="newLoc" aria-label="New player locale"><option value="A">Locale A</option><option value="B">Locale B</option></select><button class="btn primary" type="button" id="addPlayer">Add player</button><span class="status" id="rosterStatus"></span></div>
+    </div>
+
+    <div class="panel form">
+      <h3>Backup</h3>
+      <p class="muted" style="margin:0">Download everything as a file, or load a backup. Loading replaces matching records and keeps everything else.</p>
+      <div class="actions"><button class="btn" type="button" id="exportBtn">Download backup</button><button class="btn" type="button" id="importBtn">Load backup</button><input type="file" id="importFile" accept="application/json,.json" hidden><span class="status" id="backupStatus"></span></div>
+    </div>
+
+    <div class="panel form">
+      <h3>Reset this event</h3>
+      <p class="muted" style="margin:0">Clears this event's game results. Players, lists and setup stay.</p>
+      <div class="actions" id="resetArea"><button class="btn danger" type="button" id="resetBtn">Clear this event's results</button></div>
+    </div>
+  </section>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1);
+  const now=()=>new Date().toISOString();
+  const rid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const FX={"Adepta Sororitas":[["Hallowed Martyrs",3,["Take and Hold","Priority Assets"]],["Champions of Faith",2,["Disruption"]],["Bringers of Flame",2,["Priority Assets"]],["Penitent Host",2,["Purge the Foe"]],["Army of Faith",2,["Take and Hold"]],["Sanctified Orators",1,["Disruption"]],["Chorus of Condemnation",1,["Reconnaissance"]],["Sacred Champions",1,["Take and Hold"]]],"Adeptus Custodes":[["Guardians of the Throne",3,["Priority Assets","Purge the Foe"]],["Lions of the Emperor",1,["Disruption"]],["Null Maiden Vigil",1,["Disruption"]],["Emissaries Imperatus",1,["Priority Assets"]],["Emperor's Chosen",1,["Priority Assets"]],["Auric Champions",1,["Purge the Foe"]],["Dread Host",1,["Purge the Foe"]],["Shadowkeepers",1,["Purge the Foe"]],["Grav-Assault Force",1,["Reconnaissance"]],["Solar Watch",1,["Reconnaissance"]],["Aquilan Shield",1,["Take and Hold"]],["Honoured Companions",1,["Take and Hold"]],["Might of the Moritoi",1,["Take and Hold"]]],"Adeptus Mechanicus":[["Haloscreed Battle Clade",3,["Priority Assets","Purge the Foe"]],["Data-Psalm Conclave",2,["Disruption"]],["Explorator Maniple",2,["Priority Assets"]],["Lords of the Forge",2,["Priority Assets"]],["Eradication Cohort",2,["Purge the Foe"]],["Skitarii Hunter Cohort",2,["Reconnaissance"]],["Rad-Zone Corps",2,["Take and Hold"]],["Luminen Auto-choir",1,["Disruption"]],["Cohort Acquisitus",1,["Reconnaissance"]],["Cohort Cybernetica",1,["Take and Hold"]]],"Astra Militarum":[["Grizzled Company",3,["Purge the Foe","Priority Assets"]],["Siege Regiment",2,["Disruption"]],["Hammer of the Emperor",2,["Purge the Foe"]],["Steel Hammer",2,["Purge the Foe"]],["Mechanised Assault",2,["Reconnaissance"]],["Recon Element",2,["Reconnaissance"]],["Armoured Infantry",2,["Take and Hold"]],["Combined Arms",2,["Take and Hold"]],["Bridgehead Strike",1,["Priority Assets"]],["Designation Force",1,["Reconnaissance"]],["Abhuman Auxiliaries",1,["Take and Hold"]]],"Grey Knights":[["Warpbane Task Force",3,["Take and Hold","Purge the Foe"]],["Banishers",2,["Disruption"]],["Sanctic Spearhead",2,["Priority Assets"]],["Brotherhood Strike",2,["Purge the Foe"]],["Augurium Task Force",2,["Reconnaissance"]],["Hallowed Conclave",2,["Take and Hold"]],["Fires of Purgation",1,["Disruption"]],["Argent Assault",1,["Priority Assets"]],["Immaterial Interdiction",1,["Reconnaissance"]]],"Imperial Agents":[["Ordo Malleus Daemon Hunters",2,["Priority Assets"]],["Ordo Xenos Alien Hunters",2,["Purge the Foe"]],["Imperialis Fleet",2,["Reconnaissance"]],["Ordo Hereticus Purgation Force",2,["Take and Hold"]],["Veiled Blade Elimination Force",1,["Disruption"]]],"Imperial Knights":[["Freeblade Company",3,["Priority Assets","Purge the Foe"]],["Questoris Companions",3,["Take and Hold","Reconnaissance"]],["Valourstrike Lance",2,["Purge the Foe"]],["Spearhead-At-Arms",2,["Reconnaissance"]],["Gate Warden Lance",2,["Take and Hold"]],["Questor Forgepact",1,["Disruption"]],["Dominus Foebreakers",1,["Priority Assets"]],["Throne-Bonded Outriders",1,["Reconnaissance"]]],"Chaos Daemons":[["Daemonic Incursion",3,["Take and Hold","Disruption"]],["Legion of Excess",2,["Priority Assets"]],["Scintillating Legion",2,["Priority Assets"]],["Blood Legion",2,["Purge the Foe"]],["Shadow Legion",2,["Purge the Foe"]],["Plague Legion",2,["Take and Hold"]],["Cavalcade of Chaos",1,["Disruption"]],["Warptide",1,["Reconnaissance"]],["Lords of the Warp",1,["Take and Hold"]]],"Chaos Knights":[["Infernal Lance",3,["Purge the Foe","Priority Assets"]],["Helhunt Lance",2,["Disruption"]],["Traitoris Lance",2,["Purge the Foe"]],["Houndpack Lance",2,["Reconnaissance"]],["Lords of Dread",2,["Take and Hold"]],["Bastions of Tyranny",1,["Priority Assets"]],["Hunting Warpack",1,["Reconnaissance"]],["Iconoclast Fiefdom",1,["Take and Hold"]]],"Chaos Space Marines":[["Pactbound Zealots",3,["Disruption","Priority Assets"]],["Huron's Marauders",3,["Disruption","Purge the Foe"]],["Renegade Raiders",3,["Priority Assets","Reconnaissance"]],["Creations of Bile",3,["Take and Hold","Purge the Foe"]],["Deceptors",2,["Disruption"]],["Dread Talons",2,["Disruption"]],["Nightmare Hunt",2,["Disruption"]],["Warpstrike Champions",2,["Disruption"]],["Chaos Cult",2,["Priority Assets"]],["Cult of the Arkifane",2,["Priority Assets"]],["Renegade Warband",2,["Priority Assets"]],["Fellhammer Siege-Host",2,["Take and Hold"]],["Soulforged Warpack",2,["Take and Hold"]],["Veterans of the Long War",2,["Take and Hold"]],["Cabal of Chaos",1,["Disruption"]],["Devotees of Destruction",1,["Priority Assets"]],["Murdertalon Raiders",1,["Reconnaissance"]]],"Death Guard":[["Virulent Vectorium",3,["Purge the Foe","Take and Hold"]],["Shamblerot Vectorium",2,["Disruption"]],["Tallyband Summoners",2,["Disruption"]],["Death Lord's Chosen",2,["Priority Assets"]],["Mortarion's Hammer",2,["Purge the Foe"]],["Champions of Contagion",2,["Take and Hold"]],["Paragons of Putrescence",1,["Priority Assets"]],["Contagion Engines",1,["Reconnaissance"]],["Flyblown Host",1,["Reconnaissance"]]],"Emperor's Children":[["Carnival of Excess",3,["Priority Assets","Disruption"]],["Coterie of the Conceited",3,["Priority Assets","Purge the Foe"]],["Rapid Evisceration",2,["Disruption"]],["Peerless Bladesmen",2,["Priority Assets"]],["Court of the Phoenician",2,["Purge the Foe"]],["Mercurial Host",2,["Reconnaissance"]],["Spectacle of Slaughter",1,["Disruption"]],["Slaanesh's Chosen",1,["Purge the Foe"]],["Frenzied Host",1,["Reconnaissance"]],["Elegant Brutes",1,["Take and Hold"]]],"Thousand Sons":[["Grand Coven",3,["Priority Assets","Disruption"]],["Rubricae Phalanx",3,["Priority Assets","Take and Hold"]],["Hexwarp Thrallband",3,["Take and Hold","Reconnaissance"]],["Warpforged Cabal",2,["Priority Assets"]],["Warpmeld Pact",2,["Purge the Foe"]],["Changehost of Deceit",2,["Reconnaissance"]],["Sekhetar Cohort",1,["Disruption"]],["Servants of Change",1,["Reconnaissance"]],["Ritual of Regeneration",1,["Take and Hold"]]],"World Eaters":[["Cult of Blood",2,["Priority Assets"]],["Berzerker Warband",2,["Purge the Foe"]],["Possessed Slaughterband",2,["Purge the Foe"]],["Khorne Daemonkin",2,["Reconnaissance"]],["Goretrack Onslaught",2,["Take and Hold"]],["Brazen Engines",1,["Disruption"]],["Vessels of Wrath",1,["Priority Assets"]],["Butchers of Khorne",1,["Take and Hold"]]],"Aeldari":[["Aspect Host",3,["Priority Assets","Reconnaissance"]],["Ghosts of the Webway",2,["Disruption"]],["Windrider Host",2,["Disruption"]],["Corsair Coterie",2,["Priority Assets"]],["Devoted of Ynnead",2,["Priority Assets"]],["Seer Council",2,["Priority Assets"]],["Eldritch Raiders",2,["Purge the Foe"]],["Serpent's Brood",2,["Purge the Foe"]],["Warhost",2,["Reconnaissance"]],["Guardian Battlehost",2,["Take and Hold"]],["Spirit Conclave",2,["Take and Hold"]],["Fateful Performance",1,["Disruption"]],["Armoured Warhost",1,["Reconnaissance"]],["Path of the Outcast",1,["Reconnaissance"]],["Twilight Flickers",1,["Take and Hold"]]],"Drukhari":[["Reaper's Wager",3,["Purge the Foe","Priority Assets"]],["Kabalite Cartel",2,["Disruption"]],["Realspace Raiders",2,["Priority Assets"]],["Spectacle of Spite",2,["Purge the Foe"]],["Skysplinter Assault",2,["Reconnaissance"]],["Covenite Coterie",2,["Take and Hold"]],["Kabalite Agonysts",1,["Disruption"]],["Exhibition of Slaughter",1,["Reconnaissance"]],["Tools of Torment",1,["Take and Hold"]]],"Genestealer Cults":[["Host of Ascension",3,["Take and Hold","Reconnaissance"]],["Xenocreed Congregation",2,["Priority Assets"]],["Final Day",2,["Purge the Foe"]],["Outlander Claw",2,["Reconnaissance"]],["Biosanctic Broodsurge",2,["Take and Hold"]],["Brood Brother Auxilia",2,["Take and Hold"]],["Heroes of the Uprising",1,["Disruption"]],["Purestrain Broodswarm",1,["Priority Assets"]],["Xenocult Masses",1,["Reconnaissance"]]],"Leagues of Votann":[["Hearthband",3,["Reconnaissance","Priority Assets"]],["Persecution Prospect",2,["Disruption"]],["Hearthfyre Arsenal",2,["Priority Assets"]],["Dêlve Assault Shift",2,["Purge the Foe"]],["Needgaârd Oathband",2,["Purge the Foe"]],["Brandfast Oathband",2,["Take and Hold"]],["Mercenary Oathband",2,["Take and Hold"]],["Armoured Trailblazers",1,["Disruption"]],["Hearthguard Covenant",1,["Priority Assets"]],["Farseekers",1,["Reconnaissance"]]],"Necrons":[["Starshatter Arsenal",3,["Priority Assets","Purge the Foe"]],["Awakened Dynasty",3,["Take and Hold","Priority Assets"]],["Obeisance Phalanx",2,["Disruption"]],["Pantheon of Woe",2,["Disruption"]],["Cryptek Conclave",2,["Priority Assets"]],["Annihilation Legion",2,["Purge the Foe"]],["Cursed Legion",2,["Purge the Foe"]],["Hypercrypt Legion",2,["Reconnaissance"]],["Canoptek Court",2,["Take and Hold"]],["The Phaeron's Armoury",1,["Priority Assets"]],["Skyshroud Spearhead",1,["Reconnaissance"]],["Hand of the Dynasty",1,["Take and Hold"]]],"Orks":[["War Horde",3,["Take and Hold","Purge the Foe"]],["Madcap Meks",1,["Disruption"]],["Wurrband",1,["Disruption"]],["Runt Swarm",1,["Priority Assets"]],["Wreckas",1,["Priority Assets"]],["Brute Bosses",1,["Purge the Foe"]],["Bully Boyz",1,["Purge the Foe"]],["Da Big Hunt",1,["Purge the Foe"]],["Dread Mob",1,["Purge the Foe"]],["Shoota Boyz",1,["Purge the Foe"]],["Flyboyz",1,["Reconnaissance"]],["Kult of Speed",1,["Reconnaissance"]],["Blitz Brigade",1,["Take and Hold"]],["Green Tide",1,["Take and Hold"]],["Taktikal Brigade",1,["Take and Hold"]]],"T'au Empire":[["Mont'ka",3,["Priority Assets","Take and Hold"]],["Retaliation Cadre",3,["Purge the Foe","Reconnaissance"]],["Kauyon",2,["Reconnaissance"]],["Kroot Hunting Pack",2,["Take and Hold"]],["Auxiliary Cadre",1,["Disruption"]],["Experimental Prototype Cadre",1,["Priority Assets"]],["Advanced Acquisition Cadre",1,["Reconnaissance"]]],"Tyranids":[["Invasion Fleet",3,["Priority Assets","Take and Hold"]],["Subterranean Assault",3,["Reconnaissance","Disruption"]],["Synaptic Nexus",2,["Disruption"]],["Assimilation Swarm",2,["Priority Assets"]],["Crusher Stampede",2,["Purge the Foe"]],["Vanguard Onslaught",2,["Reconnaissance"]],["Unending Swarm",2,["Take and Hold"]],["Ambush Predators",1,["Disruption"]],["Talons of the Norn Queen",1,["Take and Hold"]],["Warrior Bioform Onslaught",1,["Take and Hold"]]],"Space Marines":[["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Black Templars":[["Vow-sworn Crusaders",2,["Purge the Foe"]],["Marshal's Household",1,["Priority Assets"]],["Fist of the God-Emperor",1,["Take and Hold"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Blood Angels":[["Angelic Inheritors",3,["Priority Assets","Purge the Foe"]],["Encarmine Speartip",1,["Disruption"]],["Wrath of the Doomed",1,["Purge the Foe"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Dark Angels":[["Wrath of the Rock",2,["Take and Hold"]],["Inner Circle Task Force",1,["Priority Assets"]],["Darkflight Pursuit",1,["Reconnaissance"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Deathwatch":[["Black Spear Task Force",3,["Purge the Foe","Priority Assets"]],["Deathwatch Support",1,["Disruption"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Iron Hands":[["Medusa's Wrath",2,["Purge the Foe"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Imperial Fists":[["Ceramite Sentinels",2,["Take and Hold"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Raven Guard":[["Shadowmark Talon",2,["Disruption"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Salamanders":[["Forgefather's Seekers",2,["Priority Assets"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Space Wolves":[["Saga of the Great Wolf",2,["Take and Hold"]],["Champions of Fenris",1,["Priority Assets"]],["Saga of the Beastslayer",1,["Purge the Foe"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"Ultramarines":[["Blade of Ultramar",3,["Priority Assets","Take and Hold"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]],"White Scars":[["Spearpoint Task Force",2,["Reconnaissance"]],["Gladius Task Force",3,["Priority Assets","Take and Hold"]],["Phobos Shadow Force",1,["Disruption"]],["Phobos Shock Force",1,["Disruption"]],["Ironclad Champions",1,["Priority Assets"]],["Tactical Brethren",1,["Priority Assets"]],["Tacticus Firestorm Force",1,["Priority Assets"]],["Terminator Storm Force",1,["Priority Assets"]],["Devastator Brethren",1,["Purge the Foe"]],["Ironstorm Spearhead",1,["Purge the Foe"]],["Gauntlet Task Force",1,["Reconnaissance"]],["Stormlance Task Force",1,["Reconnaissance"]],["Assault Brethren",1,["Take and Hold"]],["Gravis Linebreaker Force",1,["Take and Hold"]],["Gravis Siege Force",1,["Take and Hold"]],["Tacticus Attack Force",1,["Take and Hold"]]]};
+  const DISP=['Purge the Foe','Priority Assets','Take and Hold','Reconnaissance','Disruption'];
+  const detsOf=l=>(l&&Array.isArray(l.detachments)&&l.detachments.length)?l.detachments:(l&&l.detachment?[l.detachment]:[]);
+  function armyFields(px){return `<div class="army form" style="gap:12px">
+    <label>Faction<select id="${px}_fac" data-army="${px}" data-role="fac"><option value="">Choose faction</option>${Object.keys(FX).sort().map(f=>`<option value="${esc(f)}">${esc(f)}</option>`).join('')}<option value="__other">Other / not listed</option></select></label>
+    <label id="${px}_facoL" hidden>Faction name<input type="text" id="${px}_faco" maxlength="60"></label>
+    <div class="grid3" id="${px}_dets"></div>
+    <div class="grid2"><label>Force Disposition<select id="${px}_disp"></select></label><div class="status" id="${px}_dp" style="align-self:end"></div></div></div>`}
+  function fillArmy(px,v){const fs=$(px+'_fac');if(!fs)return;
+    if(v){if(v.fac!==undefined)fs.value=v.fac;else{const known=v.faction&&FX[v.faction];fs.value=v.faction?(known?v.faction:'__other'):'';if(v.faction&&!known)$(px+'_faco').value=v.faction}}
+    const cur=v?{detachments:detsOf(v),disposition:v.disposition||''}:readArmy(px);const fac=fs.value,other=fac==='__other';$(px+'_facoL').hidden=!other;
+    const list=FX[fac]||[];const dets=cur.detachments||[];let h='';
+    for(let i=0;i<3;i++){const val=dets[i]||'';const lbl=`Detachment ${i+1}${i?' (optional)':''}`;
+      if(other)h+=`<label>${lbl}<input type="text" id="${px}_det${i}" data-army="${px}" maxlength="60" value="${esc(val)}"></label>`;
+      else{const taken=dets.filter((d,j)=>j!==i&&d);h+=`<label>${lbl}<select id="${px}_det${i}" data-army="${px}" ${fac?'':'disabled'}><option value="">${i?'None':(fac?'Choose detachment':'Choose a faction first')}</option>${list.filter(d=>!taken.includes(d[0])).map(d=>`<option value="${esc(d[0])}" ${d[0]===val?'selected':''}>${esc(d[0])} \u00b7 ${d[1]} DP \u00b7 ${esc(d[2].join(' / '))}</option>`).join('')}</select></label>`}}
+    $(px+'_dets').innerHTML=h;
+    const chosen=other?[]:dets.filter(Boolean).map(n=>list.find(d=>d[0]===n)).filter(Boolean);
+    const avail=other?DISP:[...new Set(chosen.flatMap(d=>d[2]))];const dsel=$(px+'_disp');
+    dsel.innerHTML=`<option value="">${avail.length?'Choose disposition':'Pick a detachment first'}</option>`+avail.map(x=>`<option value="${esc(x)}" ${x===cur.disposition?'selected':''}>${esc(x)}</option>`).join('');dsel.disabled=!avail.length;
+    $(px+'_dp').textContent=chosen.length?`Detachment points: ${chosen.reduce((a,d)=>a+d[1],0)}`:''}
+  function readArmy(px){const fs=$(px+'_fac');if(!fs)return null;const other=fs.value==='__other';
+    return{faction:other?$(px+'_faco').value.trim():fs.value,detachments:[0,1,2].map(i=>$(px+'_det'+i)).filter(Boolean).map(e=>e.value.trim()).filter(Boolean),disposition:$(px+'_disp').value}}
+  function armyError(a){if(!a.faction)return 'Choose a faction.';if(!a.detachments.length)return 'Choose at least one detachment.';if(!a.disposition)return 'Choose a Force Disposition.';return ''}
+  const S={settings:{localeA:'Locale A',localeB:'Locale B',currentEvent:null},roster:{},events:{},games:{},lists:{},vault:{},sealed:{},
+    eid:null,round:1,htab:'records',prof:{},users:{},me:null,sealedRaw:{},ownerUid:undefined,fbReady:false,authUser:null,editing:null,isOwner:false,canEdit:false,uid:null,db:null,loaded:{},listDirty:false,setupDirty:false,draft:null,hp1:'',hp2:''};
+  try{S.eid=localStorage.getItem('xf_eid')}catch(e){}
+
+  const LN=x=>x==='A'?(S.settings.localeA||'Locale A'):(S.settings.localeB||'Locale B');
+  const pname=p=>p?((S.roster[p]&&S.roster[p].name)||'Unknown player'):'Bye';
+  const ev=()=>S.events[S.eid]||null;
+  const evPlayers=e=>({A:(e&&e.players&&e.players.A)||[],B:(e&&e.players&&e.players.B)||[]});
+  const rounds=e=>(e&&e.rounds)||0;
+  const tablesOf=(e,r)=>((e&&e.schedule&&e.schedule['r'+r])||[]);
+  const gid=(eid,r,t)=>`${eid}_r${r}t${t}`;
+  const lkey=(eid,p)=>`${eid}_${p}`;
+  function result(d){if(!d||typeof d.aVP!=='number'||typeof d.bVP!=='number')return null;return{a:d.aVP,b:d.bVP}}
+  function eventGames(eid){const e=S.events[eid];const out=[];for(let r=1;r<=rounds(e);r++)tablesOf(e,r).forEach((t,i)=>{if(t.a&&t.b){const id=gid(eid,r,i+1);out.push({id,round:r,table:i+1,a:t.a,b:t.b,doc:S.games[id]})}});return out}
+  function sortedEvents(){return Object.entries(S.events).map(([id,e])=>({id,...e})).sort((x,y)=>String(y.date||'').localeCompare(String(x.date||''))||String(y.createdAt||'').localeCompare(String(x.createdAt||'')))}
+  function pickDefault(){if(S.eid&&S.events[S.eid])return;const c=S.settings.currentEvent;if(c&&S.events[c]){S.eid=c;return}const l=sortedEvents();S.eid=l.length?l[0].id:null}
+  const dfmt=(d,o)=>d?new Date(d+'T12:00:00').toLocaleDateString(undefined,o||{weekday:'short',month:'short',day:'numeric',year:'numeric'}):'Date TBD';
+  const statusPill=s=>s==='live'?'<span class="pill live">Live</span>':s==='complete'?'<span class="pill P">Complete</span>':'<span class="pill P">Upcoming</span>';
+
+  const shuffle=arr=>{const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  function genSchedule(A,B,R){if(!A.length||!B.length)return{};A=shuffle(A);B=shuffle(B);const bigA=A.length>=B.length;const L=bigA?A:B,Sm=bigA?B:A;const out={};const order=shuffle(Array.from({length:R},(_,i)=>i));
+    for(let r=0;r<R;r++){const used=new Set(),t=[];Sm.forEach((p,i)=>{const q=L[(i+r)%L.length];used.add(q);t.push(bigA?{a:q,b:p}:{a:p,b:q})});
+      const games=shuffle(t.filter(x=>x.a&&x.b)),byes=t.filter(x=>!(x.a&&x.b));L.forEach(q=>{if(!used.has(q))byes.push(bigA?{a:q,b:null}:{a:null,b:q})});out['r'+(order[r]+1)]=games.concat(byes)}return out}
+
+  const CAP=20;const capm=m=>Math.max(-CAP,Math.min(CAP,m));
+  function stats(eid){const e=S.events[eid];const pl=evPlayers(e);const st={};[...pl.A,...pl.B].forEach(p=>st[p]={p,W:0,D:0,L:0,vf:0,va:0,played:0,byes:0,vs:{},games:[],rk:0});
+    for(let r=1;r<=rounds(e);r++)tablesOf(e,r).forEach(t=>{if(t.a&&!t.b&&st[t.a])st[t.a].byes++;if(t.b&&!t.a&&st[t.b])st[t.b].byes++});
+    eventGames(eid).forEach(g=>{const r=result(g.doc);if(!r)return;const pa=st[g.a],pb=st[g.b];if(!pa||!pb)return;pa.played++;pb.played++;pa.vf+=r.a;pa.va+=r.b;pb.vf+=r.b;pb.va+=r.a;
+      const ra=r.a>r.b?1:r.a<r.b?0:.5;pa.vs[g.b]=ra;pb.vs[g.a]=1-ra;if(ra===1){pa.W++;pb.L++}else if(ra===0){pb.W++;pa.L++}else{pa.D++;pb.D++}
+      if(g.doc.rickyA)pa.rk++;if(g.doc.rickyB)pb.rk++;const f=g.doc.first;pa.games.push({opp:g.b,res:ra,m:r.a-r.b,cap:capm(r.a-r.b),round:g.round,oppFirst:f==='b'});pb.games.push({opp:g.a,res:1-ra,m:r.b-r.a,cap:capm(r.b-r.a),round:g.round,oppFirst:f==='a'})});
+    Object.values(st).forEach(x=>{x.pts=x.W*3+x.D;x.diff=x.vf-x.va});
+    Object.values(st).forEach(x=>{x.qow=0;x.cap=0;x.w2=0;x.games.forEach(g=>{const o=st[g.opp];if(g.res===1)x.qow+=o.pts;else if(g.res===.5)x.qow+=o.pts/2;x.cap+=g.cap;if(g.res===1&&g.oppFirst)x.w2++})});
+    const strength=o=>[st[o].pts,st[o].qow,st[o].cap];const cmpv=(a,b)=>{for(let i=0;i<a.length;i++)if(a[i]!==b[i])return a[i]-b[i];return 0};
+    Object.values(st).forEach(x=>{let best=null;x.games.forEach(g=>{if(!best||cmpv(strength(g.opp),strength(best.opp))>0)best=g});x.top=best;x.topScore=best?best.res*1000+best.cap:-1e9});
+    return st}
+  const STEPS=[['Quality of wins',x=>x.qow],['Capped margin',x=>x.cap],['Result vs strongest opponent',x=>x.topScore],['Wins going second',x=>x.w2]];
+  function tcmp(x,y,size){if(y.pts!==x.pts)return[y.pts>x.pts?1:-1,'Record'];
+    if(size===2&&x.vs[y.p]!==undefined&&x.vs[y.p]!==.5)return[x.vs[y.p]===1?-1:1,'Head-to-head'];
+    for(const[n,f]of STEPS){const d=f(y)-f(x);if(Math.abs(d)>1e-9)return[d>0?1:-1,n]}return[0,'']}
+  function rank(st){const arr=Object.values(st);const gs={};arr.forEach(x=>gs[x.pts]=(gs[x.pts]||0)+1);arr.forEach(x=>{x.tb='';x.shared=false});
+    arr.sort((x,y)=>tcmp(x,y,gs[x.pts])[0]||pname(x.p).localeCompare(pname(y.p)));
+    arr.forEach((x,i)=>{const pv=arr[i-1];if(!pv){x.place=1;return}const c=tcmp(pv,x,gs[x.pts]);
+      if(c[0]===0){x.place=pv.place;x.shared=pv.shared=true}else{x.place=i+1;if(c[1]!=='Record'){pv.tb=pv.tb||c[1];x.tb=x.tb||c[1]}}});return arr}
+
+  // ---------- render ----------
+  function renderHeader(){const e=ev();
+    const opts=sortedEvents().map(x=>`<option value="${esc(x.id)}" ${x.id===S.eid?'selected':''}>${esc(x.name||'Untitled event')} · ${esc(dfmt(x.date,{month:'short',day:'numeric',year:'numeric'}))}</option>`).join('');
+    $('evPick').innerHTML=opts||'<option>No events yet</option>';$('evPick').disabled=!opts;
+    $('evName').textContent=e?(e.name||'Untitled event'):'Crossfire 40K';
+    $('evStatus').innerHTML=e?statusPill(e.status):'';$('evDate').textContent=e?dfmt(e.date):'';
+    $('evVenue').textContent=(e&&e.venue)||'';$('evVenue').hidden=!(e&&e.venue);
+    const pl=evPlayers(e);$('evSize').textContent=e?`${rounds(e)} rounds · ${pl.A.length} v ${pl.B.length}`:'';
+    $('sA').textContent=LN('A');$('sB').textContent=LN('B');
+    let wa=0,wb=0,va=0,vb=0,n=0;const gs=e?eventGames(S.eid):[];gs.forEach(g=>{const r=result(g.doc);if(!r)return;n++;va+=r.a;vb+=r.b;if(r.a>r.b)wa++;else if(r.b>r.a)wb++;else{wa+=.5;wb+=.5}});
+    $('wA').textContent=fmt(wa);$('wB').textContent=fmt(wb);$('scoreSub').textContent=`Game wins · ${n} of ${gs.length} played · VP ${va}–${vb}`;
+  }
+  const faction=p=>{const l=S.lists[lkey(S.eid,p)];return l&&l.faction?l.faction:''};
+  const dispOf=p=>{const l=S.lists[lkey(S.eid,p)];return l&&l.disposition?l.disposition:''};
+  const dtag=x=>x?`<div class="disp">${esc(x)}</div>`:'';
+  const pcell=p=>`${esc(pname(p))}${faction(p)?`<div class="muted" style="font-size:0.85rem">${esc(faction(p))}</div>`:''}`;
+
+  function renderOverview(){const e=ev();
+    const ad=e&&e.address;$('addrPanel').hidden=!ad;if(ad){$('addrVenue').textContent=e.venue||'';$('addrText').textContent=ad;$('mapLink').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((e.venue?e.venue+', ':'')+ad)}
+    const pl=evPlayers(e);$('crossSub').innerHTML=`<span class="ca">${esc(LN('A'))}</span> down the side, <span class="cb">${esc(LN('B'))}</span> across the top. R = round${e&&e.showTables?', T = table':''}.`;
+    if(!e||!pl.A.length||!pl.B.length){$('cross').innerHTML='<tbody><tr><td class="empty" style="border:0">No players or pairings set for this event yet.</td></tr></tbody>'}
+    else{const gs=eventGames(S.eid);let h='<thead><tr><th scope="col"></th>'+pl.B.map(b=>`<th scope="col" class="xb">${pcell(b)}</th>`).join('')+'</tr></thead><tbody>';
+      pl.A.forEach(a=>{h+=`<tr><th scope="row" class="xa">${pcell(a)}</th>`;pl.B.forEach(b=>{const g=gs.find(x=>x.a===a&&x.b===b);
+        if(!g){h+='<td><span class="muted">—</span></td>';return}const r=result(g.doc);let pill='<span class="pill P">Pending</span>',sc='';
+        if(r){const k=r.a>r.b?'W':r.a<r.b?'L':'D';pill=`<span class="pill ${k}">${k==='D'?'Draw':esc(pname(k==='W'?a:b).split(' ')[0])+' win'}</span>`;sc=`<span class="res">${r.a}–${r.b}</span>`}
+        h+=`<td><div class="cell"><span class="rd">R${g.round}${e.showTables?' · T'+g.table:''}</span>${sc}${pill}</div></td>`});h+='</tr>'});$('cross').innerHTML=h+'</tbody>'}
+    const n=e&&e.notes;$('notes').innerHTML=n?esc(n).replace(/\n/g,'<br>'):'No notes yet.';$('notes').classList.toggle('muted',!n);
+  }
+
+  const fxOpts=v=>`<option value="">Not recorded</option>`+Object.keys(FX).sort().map(f=>`<option value="${esc(f)}" ${f===v?'selected':''}>${esc(f)}</option>`).join('')+(v&&!FX[v]?`<option selected value="${esc(v)}">${esc(v)}</option>`:'');
+  function renderPairings(){const keep=$('in_a')?{a:$('in_a').value,b:$('in_b').value,fa:$('fa').checked,fb:$('fb').checked,ra:$('ra').checked,rb:$('rb').checked,xa:$('fxa')&&$('fxa').value,xb:$('fxb')&&$('fxb').value,id:S.editing}:null;
+    renderPairingsInner();
+    if(keep&&keep.id===S.editing&&$('in_a')){$('in_a').value=keep.a;$('in_b').value=keep.b;$('fa').checked=keep.fa;$('fb').checked=keep.fb;$('ra').checked=keep.ra;$('rb').checked=keep.rb;if($('fxa')&&keep.xa)$('fxa').value=keep.xa;if($('fxb')&&keep.xb)$('fxb').value=keep.xb}}
+  function renderPairingsInner(){const e=ev();const R=rounds(e);if(S.round>R)S.round=Math.max(1,R);
+    $('roundTabs').innerHTML=Array.from({length:R},(_,i)=>`<button type="button" data-round="${i+1}" aria-pressed="${S.round===i+1}">Round ${i+1}</button>`).join('');
+    const m=e&&e.missions&&e.missions['r'+S.round];$('missionLine').hidden=!m;$('missionLine').innerHTML=m?`<span class="ml">Round ${S.round} mission</span><span class="mn">${esc(m)}</span>`:'';
+    if(!e||!R){$('games').innerHTML='<div class="empty">Pairings haven\'t been set for this event yet.</div>';return}
+    $('games').innerHTML=tablesOf(e,S.round).map((t,i)=>{const tn=i+1;
+      if(!t.a||!t.b){const p=t.a||t.b;return `<article class="game"><div class="tbl">Bye</div><div class="bye" style="grid-column:2/-1"><b>${esc(pname(p))}</b> <span class="tag ${t.a?'A':'B'}">${esc(LN(t.a?'A':'B'))}</span> sits out this round.</div></article>`}
+      const id=gid(S.eid,S.round,tn);const d=S.games[id];const r=result(d);const editing=S.editing===id;let mid;
+      if(editing){mid=`<div class="entry"><input type="number" min="0" max="200" inputmode="numeric" id="in_a" placeholder="VP" value="${d&&d.aVP!=null?d.aVP:''}" aria-label="${esc(pname(t.a))} VP"><span class="muted">–</span><input type="number" min="0" max="200" inputmode="numeric" id="in_b" placeholder="VP" value="${d&&d.bVP!=null?d.bVP:''}" aria-label="${esc(pname(t.b))} VP"></div>`}
+      else if(r)mid=`<div class="vp ${r.a>r.b?'win-a':r.b>r.a?'win-b':''}"><span class="va">${r.a}</span><span class="muted"> – </span><span class="vb">${r.b}</span></div>`;
+      else mid='<span class="pill P">Not reported</span>';
+      const rd=' <span class="rdice">Ricky Dice</span>';const fa=(d&&d.first==='a'?' <span class="first">1st</span>':'')+(d&&d.rickyA&&!editing?rd:''),fb=(d&&d.rickyB&&!editing?rd+' ':'')+(d&&d.first==='b'?' <span class="first">1st</span>':'');
+      let extra='';if(editing){const f=d&&d.first;extra=`<div class="firstpick"><label class="chk"><input type="checkbox" id="fa" ${f==='a'?'checked':''}>${esc(pname(t.a))} went first</label><label class="chk"><input type="checkbox" id="fb" ${f==='b'?'checked':''}>${esc(pname(t.b))} went first</label></div>${(!faction(t.a)||!faction(t.b))?`<div class="firstpick fxpick"><span class="rdq">Factions played (for history)</span>${!faction(t.a)?`<label>${esc(pname(t.a))}<select id="fxa">${fxOpts(d&&d.aFaction)}</select></label>`:''}${!faction(t.b)?`<label>${esc(pname(t.b))}<select id="fxb">${fxOpts(d&&d.bFaction)}</select></label>`:''}</div>`:''}<div class="firstpick rickypick"><span class="rdq">Did anyone use Ricky Dice?</span><label class="chk"><input type="checkbox" id="ra" ${d&&d.rickyA?'checked':''}>${esc(pname(t.a))} used Ricky Dice</label><label class="chk"><input type="checkbox" id="rb" ${d&&d.rickyB?'checked':''}>${esc(pname(t.b))} used Ricky Dice</label></div>`}
+      let foot='';if(S.canEdit){foot=editing?`<div class="game-foot"><span class="status" id="gst"></span><button class="btn" type="button" data-cancel="1">Cancel</button>${r?`<button class="btn danger" type="button" data-clear="${id}">Clear</button>`:''}<button class="btn primary" type="button" data-save="${id}" data-a="${esc(t.a)}" data-b="${esc(t.b)}" data-r="${S.round}" data-t="${tn}">Save result</button></div>`:`<div class="game-foot"><button class="btn" type="button" data-edit="${id}">${r?'Edit result':'Enter result'}</button></div>`}
+      return `<article class="game${editing?' editing':''}${e.showTables?'':' notbl'}">${e.showTables?`<div class="tbl">Table<b>${tn}</b></div>`:''}
+        <div class="pl"><div class="nm"><span class="ca">${esc(pname(t.a))}</span>${fa}</div>${dtag(dispOf(t.a)||(d&&d.aDisp))}<div class="fx">${esc(faction(t.a)||(d&&d.aFaction)||(e.past?'Faction not recorded':'List hidden or not in'))}</div></div>
+        <div class="mid">${mid}</div>
+        <div class="pl right"><div class="nm">${fb?fb+' ':''}<span class="cb">${esc(pname(t.b))}</span></div>${dtag(dispOf(t.b)||(d&&d.bDisp))}<div class="fx">${esc(faction(t.b)||(d&&d.bFaction)||(e.past?'Faction not recorded':'List hidden or not in'))}</div></div>${extra}${foot}</article>`}).join('');
+  }
+
+  function renderStandings(){const e=ev();if(!e){$('stand').innerHTML='';$('standSub').textContent='';$('tbDetails').innerHTML='';return}
+    const st=stats(S.eid);const arr=rank(st);const gs=eventGames(S.eid);const anyBye=arr.some(x=>x.byes);const played=gs.filter(g=>result(g.doc)).length;
+    const pl=evPlayers(e);const locOf=p=>pl.A.includes(p)?'a':'b';const sg=n=>(n>0?'+':'')+fmt(n);
+    $('standSub').textContent=played?`${played} of ${gs.length} games reported`:'No results yet';
+    $('stand').innerHTML='<thead><tr><th>#</th><th>Player</th><th>W-D-L</th><th>Pts</th><th title="Quality of wins">Quality</th><th title="Capped margin">Margin</th>'+(anyBye?'<th>Byes</th>':'')+'</tr></thead><tbody>'+
+      (arr.length?arr.map(x=>`<tr class="${x.place===1&&played?'first-place':''}"><td class="rank num">${x.place}${x.shared?'=':''}</td><td><b class="c${locOf(x.p)}">${esc(pname(x.p))}</b>${x.rk?`<span class="rstar" title="Accused of Ricky Dice ${x.rk} time${x.rk>1?'s':''}">${'*'.repeat(x.rk)}</span>`:''}${faction(x.p)?`<div class="tb">${esc(faction(x.p))}</div>`:''}${x.shared&&x.played?'<div class="tb tbtag">Tied after every step</div>':x.tb&&x.played?`<div class="tb tbtag">Tie decided by: ${esc(x.tb)}</div>`:''}</td><td class="num">${x.W}-${x.D}-${x.L}</td><td class="num">${fmt(x.pts)}</td><td class="num">${fmt(x.qow)}</td><td class="num">${sg(x.cap)}</td>${anyBye?`<td class="num">${x.byes}</td>`:''}</tr>`).join(''):'<tr><td colspan="7" class="empty">No players in this event yet.</td></tr>')+'</tbody>';
+    const resWord=r=>r===1?'<span class="pill W">Win</span>':r===0?'<span class="pill L">Loss</span>':'<span class="pill D">Draw</span>';
+    $('tbDetails').innerHTML=played?arr.map(x=>{
+      const wins=x.games.filter(g=>g.res>0).map(g=>`${esc(pname(g.opp))} (${fmt(st[g.opp].pts)}${g.res===.5?' &divide; 2':''})`);
+      const caps=x.games.slice().sort((a,b)=>a.round-b.round).map(g=>`R${g.round} vs ${esc(pname(g.opp))}: ${sg(g.m)}${g.m!==g.cap?` &rarr; <b>${sg(g.cap)}</b>`:''}`);
+      return `<details class="tbrow"><summary><span class="rank num">${x.place}${x.shared?'=':''}</span> <b class="c${locOf(x.p)}">${esc(pname(x.p))}</b> <span class="muted">${x.W}-${x.D}-${x.L}</span></summary>
+        <dl class="kv tbkv">
+          <dt>Quality of wins</dt><dd><b class="num">${fmt(x.qow)}</b>${wins.length?' = '+wins.join(' + '):' (no wins yet)'}</dd>
+          <dt>Capped margin</dt><dd><b class="num">${sg(x.cap)}</b>${caps.length?'<br>'+caps.join('<br>'):''}</dd>
+          <dt>Strongest opponent</dt><dd>${x.top?`${esc(pname(x.top.opp))} ${resWord(x.top.res)} <span class="muted">capped ${sg(x.top.cap)}</span>`:'—'}</dd>
+          <dt>Wins going second</dt><dd><b class="num">${x.w2}</b></dd>
+        </dl></details>`}).join(''):'<div class="empty">Details appear once results are in.</div>';
+  }
+
+
+  // ---------- lists ----------
+  const linkedUid=p=>(S.roster[p]&&S.roster[p].uid)||null;
+  const pidOfUid=u=>{if(!u)return null;if(u===S.uid&&S.me)return S.me.pid||null;return Object.keys(S.roster).find(p=>S.roster[p].uid===u)||null};
+  function sealedFor(p){return Object.entries(S.sealed).map(([uid,d])=>({uid,x:d&&d.entries&&d.entries[S.eid]})).filter(o=>o.x&&o.x.pid===p)}
+  function merged(p){const k=lkey(S.eid,p);let best=S.vault[k]||null;const lu=linkedUid(p);
+    sealedFor(p).forEach(({uid,x})=>{if(lu&&uid!==lu)return;if(!best||String(x.updatedAt)>String(best.updatedAt))best=x});return best}
+  function ignoredSubs(){return[]}
+  function renderLists(){const e=ev();const locked=!!(e&&e.listsLocked);
+    $('lockBadge').textContent=locked?'Lists locked':'Lists open for edits';$('lockBadge').classList.toggle('on',locked);$('lockSwitch').hidden=!(S.isOwner&&e);$('lockToggle').checked=locked;
+    if(S.listDirty)return;
+    if(!e){$('lists').innerHTML='';$('myList').innerHTML='';return}
+    const pl=evPlayers(e);const all=[...pl.A,...pl.B];const loc=p=>pl.A.includes(p)?'A':'B';
+    const revealed=all.length>0&&all.every(p=>{const l=S.lists[lkey(S.eid,p)];return l&&l.text});
+    const submitted=new Set(e.submitted||[]);
+    const head=p=>`<div><h3>${esc(pname(p))}</h3><div style="font-size:.85rem"><span class="tag ${loc(p)}">${esc(LN(loc(p)))}</span></div></div>`;
+    const card=(p,l,editable)=>{l=l||{};
+      if(editable&&S.editing==='list_'+p)return `<article class="listcard"><div class="hd">${head(p)}</div>
+        ${armyFields('l')}
+        <label>List (paste from the app)<textarea id="l_t">${esc(l.text||'')}</textarea></label>
+        <div class="actions"><button class="btn" type="button" data-cancel="1">Cancel</button><button class="btn primary" type="button" data-savelist="${esc(p)}">Save list</button><span class="status" id="lst"></span></div></article>`;
+      return `<article class="listcard"><div class="hd">${head(p)}${editable&&!locked?`<button class="btn small" type="button" data-editlist="${esc(p)}">${l.text?'Edit':'Add list'}</button>`:''}</div>
+        <dl class="kv"><dt>Faction</dt><dd>${esc(l.faction||'—')}</dd><dt>Detachment${detsOf(l).length>1?'s':''}</dt><dd>${esc(detsOf(l).join(' + ')||'—')}</dd><dt>Disposition</dt><dd>${esc(l.disposition||'—')}</dd></dl>
+        ${l.text?`<details class="listtext"><summary>Show full list</summary><pre>${esc(l.text)}</pre></details>`:'<div class="empty">Not submitted yet.</div>'}</article>`};
+    if(!all.length)$('lists').innerHTML='<div class="empty">No players in this event yet.</div>';
+    else if(revealed)$('lists').innerHTML=all.map(p=>card(p,S.isOwner&&S.editing==='list_'+p?merged(p):S.lists[lkey(S.eid,p)],S.isOwner)).join('');
+    else $('lists').innerHTML=`<div class="banner" style="grid-column:1/-1"><b>Lists are hidden until all ${all.length} are in.</b> <span class="muted">${all.filter(p=>submitted.has(p)).length} of ${all.length} submitted.</span></div>`+
+      all.map(p=>`<article class="listcard"><div class="hd">${head(p)}<span class="pill ${submitted.has(p)?'W':'P'}">${submitted.has(p)?'Submitted':'Waiting'}</span></div></article>`).join('');
+    let priv='';
+    const ign=S.isOwner?ignoredSubs():[];const ignHtml=ign.length?`<div class="banner" data-tone="warn" style="margin-bottom:14px"><b>${ign.length} list submission${ign.length>1?'s were':' was'} ignored</b> because ${ign.length>1?'they came':'it came'} from an account not linked to that player: ${ign.map(o=>`${esc(pname(o.p))} (from ${esc(S.prof[o.uid]||'another account')})`).join(', ')}. If that's wrong, unlink the player in Setup → Roster.</div>`:'';
+    if(S.isOwner&&!revealed&&all.length){priv=ignHtml+`<form class="panel form" id="ownerForm"><div class="panel-head"><h2>Enter a list for a player</h2><span class="muted">For players who hand you their list. You won't see anyone's list until all are in.</span></div>
+      <fieldset style="border:0;padding:0;margin:0;display:grid;gap:12px;min-width:0" ${locked?'disabled':''}>
+      <label>Player<select id="o_pid">${all.map(p=>`<option value="${esc(p)}">${esc(pname(p))} (${esc(LN(loc(p)))})${submitted.has(p)?' · already submitted':''}</option>`).join('')}</select></label>
+      ${armyFields('o')}
+      <label>List<textarea id="o_t"></textarea></label>
+      <div class="actions"><button class="btn primary" type="submit">Save list</button><span class="status" id="o_st">Saving over a player who already submitted replaces their list.</span></div></fieldset></form>`}
+    else if(!S.isOwner&&S.uid&&!S.canEdit&&all.length){priv=`<div class="banner">You're signed in, but the organizer hasn't approved your account yet. Once they link you to your player, you can submit your list here.</div>`}
+    else if(!S.isOwner&&S.canEdit&&S.uid&&all.length&&!pidOfUid(S.uid)){priv=`<div class="banner">Your account is approved but not linked to a player yet. Ask the organizer to link you.</div>`}
+    else if(!S.isOwner&&S.canEdit&&S.uid&&all.length&&pidOfUid(S.uid)&&!all.includes(pidOfUid(S.uid))){priv=`<div class="banner">Your account is linked to <b>${esc(pname(pidOfUid(S.uid)))}</b>, who isn't playing in this event. Ask the organizer if that's wrong.</div>`}
+    else if(!S.isOwner&&S.canEdit&&S.uid&&all.length){const myPid=pidOfUid(S.uid);const m=(S.sealed[S.uid]&&S.sealed[S.uid].entries&&S.sealed[S.uid].entries[S.eid])||{};
+      priv=`<form class="panel form" id="myForm"><div class="panel-head"><h2>Submit your list</h2><span class="muted">${locked?'Lists are locked. Ask the organizer to unlock them.':'Only you and the organizer see it until all are in'}</span></div>
+      <fieldset style="border:0;padding:0;margin:0;display:grid;gap:12px;min-width:0" ${locked?'disabled':''}>
+      <input type="hidden" id="p_pid" value="${esc(myPid)}"><div class="banner" style="margin:0">Submitting as <b>${esc(pname(myPid))}</b>. Your account is linked to this player, so you can only edit your own list.</div>
+      ${armyFields('p')}
+      <label>List (paste from the app)<textarea id="p_t">${esc(m.text||'')}</textarea></label>
+      <div class="actions"><button class="btn primary" type="submit">${m.text?'Update my list':'Submit my list'}</button><span class="status" id="p_st">${m.updatedAt?'Last saved '+esc(new Date(m.updatedAt).toLocaleString()):''}</span></div></fieldset></form>`}
+    $('myList').innerHTML=priv;
+    if($('p_fac'))fillArmy('p',(S.sealed[S.uid]&&S.sealed[S.uid].entries&&S.sealed[S.uid].entries[S.eid])||{});
+    if($('o_fac'))fillArmy('o',{});
+    if($('l_fac')){const p=String(S.editing).slice(5);fillArmy('l',(revealed?merged(p):null)||merged(p)||{})}
+  }
+  async function sync(){const L=S.loaded;const e=ev();
+    if(!S.isOwner||!S.db||!e||!(L.events&&L.vault&&L.sealed&&L.lists))return;
+    if(S.syncing){S.syncAgain=true;return}S.syncing=true;const eid=S.eid;
+    try{const pl=evPlayers(e);const all=[...pl.A,...pl.B];
+      const sub=all.filter(p=>{const m=merged(p);return m&&m.text&&String(m.text).trim()});
+      if(sub.join(',')!==(e.submitted||[]).join(','))await S.db.doc('events/'+eid).update({submitted:sub});
+      if(all.length&&sub.length===all.length&&!e.listsLocked){for(const p of all){const m=merged(p),k=lkey(eid,p),cur=S.lists[k];
+        if(!cur||cur.updatedAt!==m.updatedAt)await S.db.doc('lists/'+k).set({event:eid,pid:p,faction:m.faction||'',detachments:detsOf(m),disposition:m.disposition||'',text:m.text,updatedAt:m.updatedAt})}}
+    }catch(err){}finally{S.syncing=false;if(S.syncAgain){S.syncAgain=false;sync()}}}
+
+  // ---------- events + history ----------
+  function renderEvents(){const l=sortedEvents();$('newEventBtn2').hidden=!S.isOwner;
+    $('eventList').innerHTML=l.length?l.map(x=>{const gs=eventGames(x.id);const done=gs.filter(g=>result(g.doc)).length;let wa=0,wb=0;gs.forEach(g=>{const r=result(g.doc);if(!r)return;if(r.a>r.b)wa++;else if(r.b>r.a)wb++;else{wa+=.5;wb+=.5}});
+      const pl=evPlayers(x);const d=x.date?new Date(x.date+'T12:00:00'):null;
+      return `<button type="button" class="evrow" data-pick="${esc(x.id)}" aria-current="${x.id===S.eid}" style="text-align:left;font:inherit;color:inherit;cursor:pointer;width:100%">
+        <div class="evdate">${d?`<b>${d.getDate()}</b><span>${d.toLocaleDateString(undefined,{month:'short'})} ${d.getFullYear()}</span>`:'<span>TBD</span>'}</div>
+        <div style="min-width:0"><div class="nm">${esc(x.name||'Untitled event')}</div><div class="muted" style="font-size:.85rem">${esc(x.venue||'')}${x.venue?' · ':''}${pl.A.length} v ${pl.B.length} · ${rounds(x)} rounds${done?` · <span class="ca">${esc(LN('A'))} ${fmt(wa)}</span>–<span class="cb">${fmt(wb)} ${esc(LN('B'))}</span>`:''}</div></div>
+        <div>${statusPill(x.status)}</div></button>`}).join(''):'<div class="empty">No events yet.</div>';
+  }
+  function allDone(){return Object.entries(S.games).map(([id,g])=>({id,...g})).filter(g=>g.a&&g.b&&typeof g.aVP==='number'&&typeof g.bVP==='number'&&S.events[g.event])}
+  function renderHistory(){const games=allDone();const evDate=g=>(S.events[g.event]&&S.events[g.event].date)||'';
+    games.sort((x,y)=>String(evDate(y)).localeCompare(String(evDate(x)))||(y.round-x.round)||(x.table-y.table));
+    const evCount=new Set(games.map(g=>g.event)).size;$('histSub').textContent=`${games.length} games across ${evCount} event${evCount===1?'':'s'}`;
+    let wa=0,wb=0,firstN=0,firstW=0;games.forEach(g=>{if(g.aVP>g.bVP)wa++;else if(g.bVP>g.aVP)wb++;else{wa+=.5;wb+=.5}if(g.first==='a'||g.first==='b'){firstN++;const fv=g.first==='a'?g.aVP-g.bVP:g.bVP-g.aVP;if(fv>0)firstW++;else if(fv===0)firstW+=.5}});
+    const tile=(lbl,val,sub)=>`<div><div class="eyebrow">${lbl}</div><div style="font-family:var(--display);font-size:2rem;font-weight:700;line-height:1.1">${val}</div><div class="muted" style="font-size:.85rem">${sub}</div></div>`;
+    $('histTop').innerHTML=tile('Locale series',`<span class="ca">${fmt(wa)}</span> – <span class="cb">${fmt(wb)}</span>`,`${esc(LN('A'))} vs ${esc(LN('B'))}, game wins`)+
+      tile('First-turn win rate',firstN?Math.round(firstW/firstN*100)+'%':'—',firstN?`Player going first, ${firstN} games logged`:'Mark who went first when entering results')+
+      tile('Events',String(Object.keys(S.events).length),`${evCount} with results`);
+    const rec={};const R=p=>rec[p]||(rec[p]={p,G:0,W:0,D:0,L:0,vf:0,va:0,fG:0,fW:0,rk:0});
+    games.forEach(g=>{const a=R(g.a),b=R(g.b);a.G++;b.G++;a.vf+=g.aVP;a.va+=g.bVP;b.vf+=g.bVP;b.va+=g.aVP;if(g.aVP>g.bVP){a.W++;b.L++}else if(g.bVP>g.aVP){b.W++;a.L++}else{a.D++;b.D++}
+      if(g.rickyA)a.rk++;if(g.rickyB)b.rk++;if(g.first==='a'){a.fG++;if(g.aVP>g.bVP)a.fW++}if(g.first==='b'){b.fG++;if(g.bVP>g.aVP)b.fW++}});
+    const rows=Object.values(rec).sort((x,y)=>((y.W+y.D/2)/y.G-(x.W+x.D/2)/x.G)||(y.G-x.G));
+    $('histPlayers').innerHTML='<thead><tr><th>Player</th><th>G</th><th>W-D-L</th><th>Win%</th><th title="Wins when going first / games going first">1st-turn W</th><th title="Games where they used Ricky Dice">Ricky Dice</th></tr></thead><tbody>'+
+      (rows.length?rows.map(x=>{const loc=S.roster[x.p]?S.roster[x.p].locale:'';return `<tr><td><b class="${loc?'c'+loc.toLowerCase():''}">${esc(pname(x.p))}</b></td><td class="num">${x.G}</td><td class="num">${x.W}-${x.D}-${x.L}</td><td class="num">${Math.round((x.W+x.D/2)/x.G*100)}%</td><td class="num">${x.fG?x.fW+'/'+x.fG:'—'}</td><td class="num">${x.rk||'—'}</td></tr>`}).join(''):'<tr><td colspan="6" class="empty">No completed games yet.</td></tr>')+'</tbody>';
+    renderMargins(games);renderTrophy();renderRicky(games);
+    const ppl=Object.entries(S.roster).sort((x,y)=>String(x[1].name).localeCompare(String(y[1].name)));
+    const opt=(sel,blank)=>`<option value="">${blank}</option>`+ppl.map(([id,r])=>`<option value="${esc(id)}" ${sel===id?'selected':''}>${esc(r.name)}</option>`).join('');
+    $('hP1').innerHTML=opt(S.hp1,'Everyone');$('hP2').innerHTML=opt(S.hp2,'Any opponent');
+    let log=games;if(S.hp1)log=log.filter(g=>g.a===S.hp1||g.b===S.hp1);if(S.hp2)log=log.filter(g=>g.a===S.hp2||g.b===S.hp2);
+    if(S.hp1&&S.hp2&&S.hp1!==S.hp2){let w1=0,w2=0,d=0;log.forEach(g=>{const s1=g.a===S.hp1?g.aVP:g.bVP,s2=g.a===S.hp1?g.bVP:g.aVP;if(s1>s2)w1++;else if(s2>s1)w2++;else d++});
+      $('h2h').hidden=false;$('h2h').innerHTML=log.length?`<b>Head-to-head:</b> ${esc(pname(S.hp1))} ${w1} – ${w2} ${esc(pname(S.hp2))}${d?`, ${d} draw${d>1?'s':''}`:''} across ${log.length} game${log.length>1?'s':''}`:'These two haven\'t played yet.'}
+    else $('h2h').hidden=true;
+    $('histLog').innerHTML='<thead><tr><th>Event</th><th>Players</th><th style="text-align:right">Score</th></tr></thead><tbody>'+
+      (log.length?log.map(g=>{const e=S.events[g.event];const k=g.aVP>g.bVP?'a':g.bVP>g.aVP?'b':'';
+        const side=(p,vp,f,fac,isW,rk)=>`<span style="${isW?'font-weight:600':''}">${esc(pname(p))}</span>${f?' <span class="first">1st</span>':''}${rk?' <span class="rdice">Ricky Dice</span>':''}${fac?` <span class="muted" style="font-size:0.85rem">${esc(fac)}</span>`:''}`;
+        return `<tr><td><div>${esc(e.name||'Event')}</div><div class="tb">${esc(dfmt(e.date,{month:'short',day:'numeric',year:'numeric'}))} · Round ${g.round}</div></td>
+        <td>${side(g.a,g.aVP,g.first==='a',g.aFaction,k==='a',g.rickyA)}<br>${side(g.b,g.bVP,g.first==='b',g.bFaction,k==='b',g.rickyB)}</td><td class="num" style="text-align:right">${g.aVP}<br>${g.bVP}</td></tr>`}).join(''):'<tr><td colspan="3" class="empty">No games match.</td></tr>')+'</tbody>';
+  }
+
+  function renderMargins(games){const sg=n=>(n>0?'+':'')+n;const M={};const R=p=>M[p]||(M[p]={p,G:0,tot:0,wins:[],big:null,big20:0});
+    const winMargins=[];games.forEach(g=>{[[g.a,g.aVP-g.bVP],[g.b,g.bVP-g.aVP]].forEach(([p,m])=>{const x=R(p);x.G++;x.tot+=m;if(m>0){x.wins.push(m);winMargins.push(m);if(m>CAP)x.big20++}if(x.big===null||m>x.big)x.big=m})});
+    const med=a=>{if(!a.length)return null;const b=a.slice().sort((x,y)=>x-y);const h=Math.floor(b.length/2);return b.length%2?b[h]:(b[h-1]+b[h])/2};
+    const allMed=med(winMargins);let blow=null;games.forEach(g=>{const m=Math.abs(g.aVP-g.bVP);if(!blow||m>blow.m)blow={m,g}});
+    const tile=(lbl,val,sub)=>`<div><div class="eyebrow">${lbl}</div><div style="font-family:var(--display);font-size:2rem;font-weight:700;line-height:1.1">${val}</div><div class="muted" style="font-size:.9rem">${sub}</div></div>`;
+    $('marginTop').innerHTML=tile('Typical winning margin',allMed===null?'—':fmt(allMed),allMed===null?'No wins yet':`Median of ${winMargins.length} win${winMargins.length===1?'':'s'}. A good guide for the standings cap (currently &plusmn;${CAP}).`)+
+      tile('Biggest win',blow&&blow.m?blow.m:'—',blow&&blow.m?`${esc(pname(blow.g.aVP>blow.g.bVP?blow.g.a:blow.g.b))} over ${esc(pname(blow.g.aVP>blow.g.bVP?blow.g.b:blow.g.a))}, ${blow.g.aVP}–${blow.g.bVP}`:'No decisive games yet');
+    const rows=Object.values(M).sort((a,b)=>b.tot/b.G-a.tot/a.G);
+    $('histMargins').innerHTML='<thead><tr><th>Player</th><th class="hide-sm">G</th><th>Avg margin</th><th>Avg win</th><th class="hide-sm">Total</th><th class="hide-sm">Biggest</th><th>20+ wins</th></tr></thead><tbody>'+
+      (rows.length?rows.map(x=>{const loc=S.roster[x.p]?S.roster[x.p].locale:'';const aw=x.wins.length?x.wins.reduce((a,b)=>a+b,0)/x.wins.length:null;
+        return `<tr><td><b class="${loc?'c'+loc.toLowerCase():''}">${esc(pname(x.p))}</b></td><td class="num hide-sm">${x.G}</td><td class="num">${sg(Math.round(x.tot/x.G*10)/10)}</td><td class="num">${aw===null?'—':'+'+fmt(Math.round(aw*10)/10)}</td><td class="num hide-sm">${sg(x.tot)}</td><td class="num hide-sm">${sg(x.big)}</td><td class="num">${x.big20}</td></tr>`}).join(''):'<tr><td colspan="7" class="empty">No completed games yet.</td></tr>')+'</tbody>'}
+  function renderTrophy(){
+    const done=sortedEvents().filter(x=>{const gs=eventGames(x.id);const n=gs.filter(g=>result(g.doc)).length;return n&&(x.status==='complete'||n===gs.length)});
+    const e=done[0];if(!e){$('trophy').innerHTML='<div class="eyebrow">Current trophy holder</div><div class="tname muted">Up for grabs</div><div class="tsub">The winner of the most recent completed event holds the trophy.</div>';return}
+    const st=stats(e.id);const arr=rank(st);const champs=arr.filter(x=>x.place===1);const c=champs[0];const pl=evPlayers(e);
+    let wa=0,wb=0;eventGames(e.id).forEach(g=>{const r=result(g.doc);if(!r)return;if(r.a>r.b)wa++;else if(r.b>r.a)wb++;else{wa+=.5;wb+=.5}});
+    const lw=wa>wb?'A':wb>wa?'B':null;
+    $('trophy').innerHTML=`<div class="eyebrow">Current trophy holder${champs.length>1?'s':''}</div>
+      <div class="tname">${champs.map(x=>`<span class="c${pl.A.includes(x.p)?'a':'b'}">${esc(pname(x.p))}</span>`).join(' &amp; ')}</div>
+      <div class="tsub">Won <b>${esc(e.name||'Untitled event')}</b> · ${esc(dfmt(e.date,{month:'short',day:'numeric',year:'numeric'}))} · ${c.W}-${c.D}-${c.L}, ${fmt(c.pts)} pts${faction(c.p)&&S.eid===e.id?' · '+esc(faction(c.p)):''}</div>
+      <div class="tsub">Locale result: ${lw?`<b class="c${lw.toLowerCase()}">${esc(LN(lw))}</b> won ${fmt(Math.max(wa,wb))}–${fmt(Math.min(wa,wb))}`:`${esc(LN('A'))} and ${esc(LN('B'))} drew ${fmt(wa)}–${fmt(wb)}`}</div>`}
+  function renderRicky(games){const rows=[];games.forEach(g=>{if(g.rickyA)rows.push({g,p:g.a,o:g.b,m:g.aVP,t:g.bVP});if(g.rickyB)rows.push({g,p:g.b,o:g.a,m:g.bVP,t:g.aVP})});
+    const sum={};rows.forEach(r=>{const x=sum[r.p]||(sum[r.p]={p:r.p,n:0,W:0,D:0,L:0});x.n++;if(r.m>r.t)x.W++;else if(r.m<r.t)x.L++;else x.D++});
+    const cl=p=>{const l=S.roster[p]&&S.roster[p].locale;return l?'c'+l.toLowerCase():''};
+    const sr=Object.values(sum).sort((a,b)=>b.n-a.n||pname(a.p).localeCompare(pname(b.p)));
+    $('rickySum').innerHTML='<thead><tr><th>Player</th><th>Accused</th><th>Record in those games</th></tr></thead><tbody>'+(sr.length?sr.map(x=>`<tr><td><b class="${cl(x.p)}">${esc(pname(x.p))}</b><span class="rstar">${'*'.repeat(Math.min(x.n,10))}</span></td><td class="num">${x.n}</td><td class="num">${x.W}-${x.D}-${x.L}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">No accusations yet. Suspiciously quiet.</td></tr>')+'</tbody>';
+    $('rickyLog').innerHTML='<thead><tr><th>Event</th><th>Accused</th><th style="text-align:right">Result</th></tr></thead><tbody>'+(rows.length?rows.map(r=>{const e=S.events[r.g.event];const k=r.m>r.t?'W':r.m<r.t?'L':'D';
+      return `<tr><td><div>${esc(e.name||'Event')}</div><div class="tb">${esc(dfmt(e.date,{month:'short',day:'numeric',year:'numeric'}))} · Round ${r.g.round}</div></td><td><b class="${cl(r.p)}">${esc(pname(r.p))}</b> <span class="rdice">Ricky Dice</span><div class="tb">vs ${esc(pname(r.o))}</div></td><td style="text-align:right"><span class="pill ${k}">${k==='W'?'Win':k==='L'?'Loss':'Draw'}</span><div class="num">${r.m}–${r.t}</div></td></tr>`}).join(''):'<tr><td colspan="3" class="empty">No Ricky Dice games logged.</td></tr>')+'</tbody>'}
+  function showHtab(){document.querySelectorAll('[data-htab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.htab===S.htab)));document.querySelectorAll('[data-hpanel]').forEach(p=>p.hidden=p.dataset.hpanel!==S.htab)}
+
+  // ---------- setup ----------
+  function renderSetup(){if(!S.isOwner)return;const e=ev();
+    if(e&&!S.schedDirty){S.draft={players:JSON.parse(JSON.stringify(evPlayers(e))),rounds:rounds(e),schedule:JSON.parse(JSON.stringify(e.schedule||{}))};renderDraft()}
+    if(S.setupDirty)return;
+    $('detailForm').hidden=!e;$('schedPanel').hidden=!e;$('makeCurrent').hidden=!e;$('delArea').hidden=!e;
+    $('f_la').value=S.settings.localeA||'';$('f_lb').value=S.settings.localeB||'';
+    $('newLoc').innerHTML=`<option value="A">${esc(LN('A'))}</option><option value="B">${esc(LN('B'))}</option>`;
+    const rs=Object.entries(S.roster).sort((x,y)=>(x[1].locale||'').localeCompare(y[1].locale||'')||String(x[1].name).localeCompare(String(y[1].name)));
+    $('rosterRows').innerHTML=rs.length?rs.map(([id,r])=>`<div class="rrow" data-rid="${esc(id)}"><input type="text" value="${esc(r.name)}" maxlength="40" aria-label="Player name" data-f="name"><select data-f="locale" aria-label="Locale"><option value="A" ${r.locale==='A'?'selected':''}>${esc(LN('A'))}</option><option value="B" ${r.locale==='B'?'selected':''}>${esc(LN('B'))}</option></select><label class="chk"><input type="checkbox" data-f="active" ${r.active!==false?'checked':''}>Active</label><button class="btn small" type="button" data-saveplayer="${esc(id)}">Save</button><div class="status" style="grid-column:1/-1">${r.uid?`Linked to account: <b>${esc(S.prof[r.uid]||'a player account')}</b> <button class="btn small" type="button" data-unlink="${esc(id)}">Unlink</button>`:'Not linked to an account. Link one under Player accounts.'}</div></div>`).join(''):'<div class="empty">No players yet. Add your first player below.</div>';
+    if(!e)return;
+    $('f_name').value=e.name||'';$('f_date').value=e.date||'';$('f_status').value=e.status||'upcoming';$('f_points').value=e.points??'';$('f_tables').checked=!!e.showTables;$('f_venue').value=e.venue||'';$('f_address').value=e.address||'';$('f_notes').value=e.notes||'';
+    renderMissionFields();
+  }
+  function renderMissionFields(){const e=ev();const R=Math.max(S.draft?S.draft.rounds:0,rounds(e),1);const cur={};document.querySelectorAll('#missionFields input').forEach(i=>cur[i.dataset.r]=i.value);
+    $('missionFields').innerHTML=Array.from({length:R},(_,i)=>{const k='r'+(i+1);const v=cur[k]??((e&&e.missions&&e.missions[k])||'');return `<label>Round ${i+1} mission<input type="text" data-r="${k}" maxlength="120" value="${esc(v)}"></label>`}).join('')}
+  function renderDraft(){const d=S.draft;if(!d)return;const active=Object.entries(S.roster).filter(([id,r])=>r.active!==false||d.players.A.includes(id)||d.players.B.includes(id));
+    $('pickPlayers').innerHTML=['A','B'].map(L=>`<div class="pickcol"><h3 class="${L==='A'?'ca':'cb'}">${esc(LN(L))}</h3>${active.filter(([id,r])=>r.locale===L).map(([id,r])=>`<label class="chk"><input type="checkbox" data-pick-player="${esc(id)}" data-loc="${L}" ${d.players[L].includes(id)?'checked':''}>${esc(r.name)}</label>`).join('')||'<div class="empty">No players in this locale. Add them in the roster below.</div>'}</div>`).join('');
+    $('f_rounds').value=d.rounds||Math.max(d.players.A.length,d.players.B.length)||'';
+    const R=d.rounds;const optA=v=>`<option value="">Bye</option>`+d.players.A.map(p=>`<option value="${esc(p)}" ${v===p?'selected':''}>${esc(pname(p))}</option>`).join('');
+    const optB=v=>`<option value="">Bye</option>`+d.players.B.map(p=>`<option value="${esc(p)}" ${v===p?'selected':''}>${esc(pname(p))}</option>`).join('');
+    let h='';for(let r=1;r<=R;r++){const ts=d.schedule['r'+r]||[];h+=`<div class="rnd"><h3>Round ${r}</h3>${ts.map((t,i)=>`<div class="trow"><span class="rd">T${i+1}</span><select data-sr="${r}" data-st="${i}" data-side="a" aria-label="Round ${r} table ${i+1} ${esc(LN('A'))}">${optA(t.a)}</select><span class="muted">vs</span><select data-sr="${r}" data-st="${i}" data-side="b" aria-label="Round ${r} table ${i+1} ${esc(LN('B'))}">${optB(t.b)}</select></div>`).join('')||'<div class="empty">No tables.</div>'}</div>`}
+    $('schedEdit').innerHTML=h||'<div class="empty">Pick players, then generate the schedule.</div>';
+    unsavedNote();
+  }
+  function unsavedNote(){const d=S.draft;if(!d)return;const w=checkSched(d);$('schedStatus').textContent=(S.schedDirty?'Not saved yet. Overview and Pairings still show the old schedule until you click Save players and pairings. ':'')+w;$('schedStatus').style.color=S.schedDirty?'var(--loss)':''}
+  function checkSched(d){const msgs=[];for(let r=1;r<=d.rounds;r++){const seen={};(d.schedule['r'+r]||[]).forEach(t=>{[t.a,t.b].forEach(p=>{if(p){seen[p]=(seen[p]||0)+1}})});Object.entries(seen).forEach(([p,n])=>{if(n>1)msgs.push(`${pname(p)} is on two tables in round ${r}.`)})}
+    const pairs={};for(let r=1;r<=d.rounds;r++)(d.schedule['r'+r]||[]).forEach(t=>{if(t.a&&t.b){const k=t.a+'|'+t.b;pairs[k]=(pairs[k]||0)+1}});Object.entries(pairs).forEach(([k,n])=>{if(n>1){const[a,b]=k.split('|');msgs.push(`${pname(a)} plays ${pname(b)} ${n} times.`)}});
+    return msgs.join(' ')}
+  const hasResults=eid=>eventGames(eid).some(g=>result(g.doc));
+
+  function renderAccounts(){const box=$('acctRows');if(!box)return;$('acctPanel').hidden=!S.isOwner;if(!S.isOwner)return;
+    const us=Object.entries(S.users).filter(([u])=>u!==S.uid).sort((a,b)=>(a[1].approved?1:0)-(b[1].approved?1:0)||String(a[1].name||a[1].email).localeCompare(String(b[1].name||b[1].email)));
+    const opts=(u,cur)=>`<option value="">Choose player</option>`+Object.entries(S.roster).filter(([p,r])=>!r.uid||r.uid===u).sort((a,b)=>String(a[1].name).localeCompare(String(b[1].name))).map(([p,r])=>`<option value="${esc(p)}" ${p===cur?'selected':''}>${esc(r.name)} (${esc(LN(r.locale))})</option>`).join('');
+    box.innerHTML=us.length?us.map(([u,x])=>`<div class="acct"><div style="min-width:0"><b>${esc(x.name||'No name')}</b> <span class="pill ${x.approved?'W':'P'}">${x.approved?'Approved':'Waiting'}</span><div class="muted" style="overflow-wrap:anywhere">${esc(x.email||'')}</div></div>
+      <div class="actions"><select id="acct_${esc(u)}" aria-label="Player for ${esc(x.name||x.email||'account')}">${opts(u,x.pid)}</select><button class="btn small primary" type="button" data-approve="${esc(u)}">${x.approved?'Update':'Approve'}</button>${x.approved?`<button class="btn small danger" type="button" data-revoke="${esc(u)}">Remove access</button>`:''}</div></div>`).join(''):'<div class="empty">No one has signed in yet. Send players the link; they appear here after they sign in.</div>'}
+  function render(){pickDefault();S.prof={};Object.entries(S.users).forEach(([u,x])=>S.prof[u]=x.name||x.email||'');S.canEdit=S.isOwner||!!(S.me&&S.me.approved===true);$('setupTab').hidden=!S.isOwner;renderAuth();renderAccounts();renderHeader();renderOverview();renderPairings();renderStandings();renderLists();renderEvents();renderHistory();renderSetup();route()}
+
+  function route(){let h=(location.hash||'').slice(1);const ok=['overview','pairings','standings','lists','events','history'].concat(S.isOwner?['setup']:[]);if(!ok.includes(h))h='overview';
+    document.querySelectorAll('section[data-view]').forEach(s=>s.hidden=s.dataset.view!==h);
+    document.querySelectorAll('nav.tabs a').forEach(a=>a.removeAttribute('aria-current'));const cur=document.querySelector(`nav.tabs a[data-tab="${h}"]`);if(cur)cur.setAttribute('aria-current','page')}
+  window.addEventListener('hashchange',route);
+  function banner(msg,tone){const b=$('banner');b.textContent=msg||'';b.hidden=!msg;if(tone)b.dataset.tone=tone;else delete b.dataset.tone}
+  function errMsg(err){const c=err&&err.code;if(c==='permission-denied')return S.uid?"You don't have permission to change this. Ask the organizer.":'Sign in first.';if(c==='resource-exhausted')return 'The database is over its free limit for today.';if(c==='unavailable')return "Can't reach the database. Check your connection.";return "Couldn't save. Check your connection and try again."}
+  function selectEvent(id){S.eid=id;S.round=1;S.editing=null;S.listDirty=false;S.setupDirty=false;S.schedDirty=false;try{localStorage.setItem('xf_eid',id)}catch(e){}render();sync()}
+
+  // ---------- events ----------
+  $('evPick').addEventListener('change',e=>selectEvent(e.target.value));
+  $('hP1').addEventListener('change',e=>{S.hp1=e.target.value;renderHistory()});
+  $('hP2').addEventListener('change',e=>{S.hp2=e.target.value;renderHistory()});
+  document.querySelector('section[data-view="lists"]').addEventListener('change',e=>{const px=e.target.dataset.army;if(!px)return;S.listDirty=true;
+    if(e.target.dataset.role==='fac')fillArmy(px,{fac:e.target.value,detachments:[],disposition:''});
+    else fillArmy(px)});
+  document.querySelector('section[data-view="lists"]').addEventListener('input',e=>{if(e.target.closest('#myForm,#ownerForm,.listcard'))S.listDirty=true});
+  document.querySelector('section[data-view="setup"]').addEventListener('input',e=>{if(e.target.closest('#detailForm,#rosterRows,#f_la,#f_lb'))S.setupDirty=true});
+
+  $('schedPanel').addEventListener('change',e=>{const t=e.target;const d=S.draft;if(!d)return;S.schedDirty=true;unsavedNote();
+    if(t.dataset.pickPlayer){const L=t.dataset.loc,p=t.dataset.pickPlayer;d.players[L]=d.players[L].filter(x=>x!==p);if(t.checked)d.players[L].push(p);renderDraft();return}
+    if(t.dataset.sr){const r=t.dataset.sr,i=+t.dataset.st;d.schedule['r'+r][i][t.dataset.side]=t.value||null;$('schedStatus').textContent=checkSched(d);return}
+    if(t.id==='f_rounds'){d.rounds=Math.max(1,Math.min(12,+t.value||1));renderMissionFields()}});
+
+  document.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+    if(d.htab){S.htab=d.htab;showHtab();return}
+    if(d.pick){selectEvent(d.pick);location.hash='overview';return}
+    if(d.round){S.round=+d.round;S.editing=null;renderPairings();return}
+    if(d.edit){S.editing=d.edit;renderPairings();const i=$('in_a');i&&i.focus();return}
+    if(d.editlist){S.editing='list_'+d.editlist;renderLists();return}
+    if(d.cancel){S.editing=null;S.listDirty=false;render();return}
+    if(d.save){const a=$('in_a').value,b=$('in_b').value;const st=$('gst');
+      if(a===''||b===''||isNaN(+a)||isNaN(+b)||+a<0||+b<0){st.textContent='Enter both VP scores (0 or more).';return}
+      const fa=$('fa').checked,fb=$('fb').checked;if(fa&&fb){st.textContent='Only one player can go first.';return}
+      const e2=ev();t.disabled=true;st.textContent='Saving…';
+      try{await S.db.doc('games/'+d.save).set({event:S.eid,round:+d.r,table:+d.t,a:d.a,b:d.b,aVP:+a,bVP:+b,first:fa?'a':fb?'b':null,rickyA:$('ra').checked,rickyB:$('rb').checked,aFaction:faction(d.a)||($('fxa')&&$('fxa').value)||null,bFaction:faction(d.b)||($('fxb')&&$('fxb').value)||null,aDisp:dispOf(d.a)||null,bDisp:dispOf(d.b)||null,date:(e2&&e2.date)||null,updatedAt:now()});S.editing=null;render()}catch(err){st.textContent=errMsg(err);t.disabled=false}return}
+    if(d.clear){t.disabled=true;try{await S.db.doc('games/'+d.clear).delete();S.editing=null;render()}catch(err){$('gst').textContent=errMsg(err);t.disabled=false}return}
+    if(d.savelist){const e2=ev();if(e2&&e2.listsLocked){S.editing=null;S.listDirty=false;render();return}const p=d.savelist;const st=$('lst');
+      const ar=readArmy('l');const er=armyError(ar);if(er){st.textContent=er;return}const body={pid:p,...ar,text:$('l_t').value,updatedAt:now()};
+      t.disabled=true;st.textContent='Saving…';try{await S.db.doc('vault/'+lkey(S.eid,p)).set(body);S.editing=null;S.listDirty=false;render();sync()}catch(err){st.textContent=errMsg(err);t.disabled=false}return}
+    if(d.saveplayer){const row=t.closest('.rrow');const nm=row.querySelector('[data-f=name]').value.trim();if(!nm){$('rosterStatus').textContent='Name can\'t be blank.';return}
+      t.disabled=true;try{await S.db.doc('roster/'+d.saveplayer).update({name:nm,locale:row.querySelector('[data-f=locale]').value,active:row.querySelector('[data-f=active]').checked});S.setupDirty=false;$('rosterStatus').textContent='Saved.';render()}catch(err){$('rosterStatus').textContent=errMsg(err)}t.disabled=false;return}
+    if(t.id==='copyAddr'){const txt=$('addrText').textContent;try{await navigator.clipboard.writeText(txt);$('copyStatus').textContent='Copied.'}catch(err){const r=document.createRange();r.selectNodeContents($('addrText'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);$('copyStatus').textContent='Selected. Copy it from here.'}return}
+    if(t.id==='addPlayer'){const nm=$('newName').value.trim();if(!nm){$('rosterStatus').textContent='Enter a name first.';return}t.disabled=true;
+      try{await S.db.doc('roster/'+rid('p')).set({name:nm,locale:$('newLoc').value,active:true,createdAt:now()});$('newName').value='';$('rosterStatus').textContent=`Added ${nm}.`;S.setupDirty=false;render()}catch(err){$('rosterStatus').textContent=errMsg(err)}t.disabled=false;return}
+    if(d.unlink){t.disabled=true;const u=linkedUid(d.unlink);try{const b=S.db.batch();b.update(S.db.doc('roster/'+d.unlink),{uid:null});if(u&&S.users[u])b.update(S.db.doc('users/'+u),{pid:null});await b.commit();$('rosterStatus').textContent=`Unlinked ${pname(d.unlink)}. Link an account under Player accounts.`;S.setupDirty=false;render()}catch(err){$('rosterStatus').textContent=errMsg(err);t.disabled=false}return}
+    if(d.approve){const u=d.approve;const pid=$('acct_'+u).value;const st=$('acctStatus');if(!pid){st.textContent='Choose which player this account belongs to.';return}t.disabled=true;
+      try{const b=S.db.batch();const old=S.users[u]&&S.users[u].pid;if(old&&old!==pid&&S.roster[old])b.update(S.db.doc('roster/'+old),{uid:null});
+        const prev=linkedUid(pid);if(prev&&prev!==u&&S.users[prev])b.update(S.db.doc('users/'+prev),{pid:null});
+        b.update(S.db.doc('users/'+u),{approved:true,pid});b.update(S.db.doc('roster/'+pid),{uid:u});await b.commit();st.textContent=`Approved and linked to ${pname(pid)}.`}catch(err){st.textContent=errMsg(err);t.disabled=false}return}
+    if(d.revoke){const u=d.revoke;const st=$('acctStatus');t.disabled=true;try{const b=S.db.batch();const pid=S.users[u]&&S.users[u].pid;if(pid&&S.roster[pid])b.update(S.db.doc('roster/'+pid),{uid:null});b.update(S.db.doc('users/'+u),{approved:false,pid:null});await b.commit();st.textContent='Access removed.'}catch(err){st.textContent=errMsg(err);t.disabled=false}return}
+    if(t.id==='exportBtn'){await doExport();return}
+    if(t.id==='importBtn'){$('importFile').click();return}
+    if(t.id==='signOut'){try{await firebase.auth().signOut()}catch(err){}return}
+    if(t.id==='signInToggle'){$('signin').hidden=!$('signin').hidden;return}
+    if(t.id==='googleBtn'){await googleSignIn();return}
+    if(t.id==='emailIn'||t.id==='emailUp'||t.id==='emailReset'){await emailAuth(t.id);return}
+    if(t.id==='saveLocales'){try{await S.db.doc('settings/main').update({localeA:$('f_la').value.trim()||'Locale A',localeB:$('f_lb').value.trim()||'Locale B'});S.setupDirty=false;$('localeStatus').textContent='Saved.';render()}catch(err){$('localeStatus').textContent=errMsg(err)}return}
+    if(t.id==='newEventBtn'||t.id==='newEventBtn2'||t.id==='pastEventBtn'){const past=t.id==='pastEventBtn';t.disabled=true;const id=rid('e');const act=Object.entries(S.roster).filter(([i,r])=>r.active!==false);
+      const A=act.filter(([i,r])=>r.locale==='A').map(([i])=>i),B=act.filter(([i,r])=>r.locale==='B').map(([i])=>i);const R=Math.max(A.length,B.length);
+      try{await S.db.doc('events/'+id).set({name:past?'Past event':'New event',date:'',venue:'',address:'',points:2000,status:past?'complete':'upcoming',past,notes:'',missions:{},players:{A,B},rounds:R,schedule:genSchedule(A,B,R),listsLocked:false,submitted:[],createdAt:now()});selectEvent(id);location.hash='setup';$('evActStatus').textContent=past?'Past event added. Set its date and name, pick who played, set the real pairings by hand and save. Then enter each result on the Pairings tab, with factions.':'New event created. Fill in the details below.'}catch(err){$('evActStatus').textContent=errMsg(err)}t.disabled=false;return}
+    if(t.id==='makeCurrent'){try{await S.db.doc('settings/main').update({currentEvent:S.eid});$('evActStatus').textContent='Everyone now opens to this event.'}catch(err){$('evActStatus').textContent=errMsg(err)}return}
+    if(t.id==='genBtn'){const dr=S.draft;if(!dr)return;if(hasResults(S.eid)){$('schedStatus').textContent='This event has results. Clear them before regenerating pairings.';return}
+      dr.rounds=Math.max(1,Math.min(12,+$('f_rounds').value||Math.max(dr.players.A.length,dr.players.B.length)||1));dr.schedule=genSchedule(dr.players.A,dr.players.B,dr.rounds);S.schedDirty=true;renderDraft();renderMissionFields();unsavedNote();
+      if(!dr.players.A.length||!dr.players.B.length)$('schedStatus').textContent='Pick at least one player from each locale.';return}
+    if(t.id==='saveSched'){const dr=S.draft;if(!dr)return;if(hasResults(S.eid)){const e2=ev();if(JSON.stringify(e2.schedule||{})!==JSON.stringify(dr.schedule)){$('schedStatus').textContent='This event has results. Clear them before changing pairings.';return}}
+      const sched={};for(let r=1;r<=dr.rounds;r++)sched['r'+r]=(dr.schedule['r'+r]||[]).filter(x=>x.a||x.b);
+      try{await S.db.doc('events/'+S.eid).update({players:dr.players,rounds:dr.rounds,schedule:sched});S.schedDirty=false;render();$('schedStatus').textContent='Saved. Overview and Pairings now show this schedule.';sync()}catch(err){$('schedStatus').textContent=errMsg(err)}return}
+    if(t.id==='delEvent'){const e2=ev();if(!e2)return;const n=eventGames(S.eid).filter(g=>g.doc).length;
+      $('delArea').innerHTML=`<div class="confirm"><span>Delete <b>${esc(e2.name||'this event')}</b>${n?` and its ${n} result${n>1?'s':''}`:''}, lists and pairings? This can't be undone, and its games leave History.</span><button class="btn" type="button" id="delNo">Keep it</button><button class="btn danger" type="button" id="delYes">Delete event</button></div>`;return}
+    if(t.id==='delNo'){$('delArea').innerHTML='<button class="btn danger" type="button" id="delEvent">Delete this event</button>';return}
+    if(t.id==='delYes'){t.disabled=true;const eid=S.eid;const e2=ev();
+      try{for(const g of eventGames(eid)){if(g.doc)await S.db.doc('games/'+g.id).delete()}
+        for(const k of Object.keys(S.games)){if(S.games[k]&&S.games[k].event===eid)await S.db.doc('games/'+k).delete()}
+        for(const k of Object.keys(S.lists)){if(k.startsWith(eid+'_'))await S.db.doc('lists/'+k).delete()}
+        for(const k of Object.keys(S.vault)){if(k.startsWith(eid+'_'))await S.db.doc('vault/'+k).delete()}
+        for(const [id,x] of Object.entries(S.sealedRaw)){if(x&&x.eid===eid)await S.db.doc('sealed/'+id).delete()}
+        await S.db.doc('events/'+eid).delete();
+        if(S.settings.currentEvent===eid)await S.db.doc('settings/main').update({currentEvent:null});
+        S.eid=null;try{localStorage.removeItem('xf_eid')}catch(err){}S.setupDirty=false;render();
+        $('delArea').innerHTML='<button class="btn danger" type="button" id="delEvent">Delete this event</button>';$('evActStatus').textContent=`Deleted ${e2&&e2.name?e2.name:'the event'}.`}
+      catch(err){$('delArea').insertAdjacentHTML('beforeend',`<span class="status">${esc(errMsg(err))}</span>`);t.disabled=false}return}
+    if(t.id==='resetBtn'){$('resetArea').innerHTML='<div class="confirm"><span>Delete every result in this event?</span><button class="btn" type="button" id="resetNo">Keep them</button><button class="btn danger" type="button" id="resetYes">Delete results</button></div>';return}
+    if(t.id==='resetNo'){$('resetArea').innerHTML='<button class="btn danger" type="button" id="resetBtn">Clear this event\'s results</button>';return}
+    if(t.id==='resetYes'){t.disabled=true;try{for(const g of eventGames(S.eid)){if(g.doc)await S.db.doc('games/'+g.id).delete()}$('resetArea').innerHTML='<button class="btn danger" type="button" id="resetBtn">Clear this event\'s results</button> <span class="status">Results cleared.</span>'}catch(err){$('resetArea').insertAdjacentHTML('beforeend',`<span class="status">${esc(errMsg(err))}</span>`)}return}
+  });
+  document.addEventListener('submit',async e=>{
+    if(e.target.id==='ownerForm'){e.preventDefault();const st=$('o_st');const e2=ev();if(e2&&e2.listsLocked){st.textContent='Lists are locked.';return}
+      const p=$('o_pid').value;const ar=readArmy('o');const er=armyError(ar);if(er){st.textContent=er;return}const body={pid:p,...ar,text:$('o_t').value,updatedAt:now()};
+      if(!body.text.trim()){st.textContent='Paste the list before saving.';return}
+      st.textContent='Saving…';try{await S.db.doc('vault/'+lkey(S.eid,p)).set(body);S.listDirty=false;renderLists();$('o_st').textContent=`Saved ${pname(p)}'s list.`;sync()}catch(err){st.textContent=errMsg(err)}return}
+    if(e.target.id==='detailForm'){e.preventDefault();const v=id=>$(id).value.trim();const missions={};document.querySelectorAll('#missionFields input').forEach(i=>missions[i.dataset.r]=i.value.trim());
+      $('detailStatus').textContent='Saving…';try{await S.db.doc('events/'+S.eid).update({name:v('f_name')||'Untitled event',date:v('f_date'),status:$('f_status').value,points:v('f_points')===''?null:+v('f_points'),venue:v('f_venue'),address:v('f_address'),showTables:$('f_tables').checked,notes:$('f_notes').value.trim(),missions});S.setupDirty=false;$('detailStatus').textContent='Saved.';render()}catch(err){$('detailStatus').textContent=errMsg(err)}return}
+    if(e.target.id==='myForm'){e.preventDefault();const st=$('p_st');const e2=ev();if(e2&&e2.listsLocked){st.textContent='Lists are locked.';return}
+      const ar=readArmy('p');const er=armyError(ar);if(er){st.textContent=er;return}const mp=pidOfUid(S.uid);const chosen=$('p_pid').value;if((mp&&chosen!==mp)||(!mp&&linkedUid(chosen))){st.textContent="You can only submit your own player's list.";return}const body={pid:chosen,...ar,text:$('p_t').value,updatedAt:now()};
+      if(!body.text.trim()){st.textContent='Paste your list before submitting.';return}
+      st.textContent='Saving…';
+      try{await S.db.doc('sealed/'+S.eid+'__'+S.uid).set(Object.assign({},body,{eid:S.eid,uid:S.uid}));
+        S.listDirty=false;S.sealed[S.uid]={entries:Object.assign({},(S.sealed[S.uid]&&S.sealed[S.uid].entries)||{},{[S.eid]:body})};renderLists();$('p_st').textContent='Saved. Only you and the organizer can see it.'}catch(err){st.textContent=errMsg(err)}}
+  });
+  $('lockToggle').addEventListener('change',async e=>{const on=e.target.checked;const st=$('lockStatus');e.target.disabled=true;st.textContent='Saving…';
+    try{await S.db.doc('events/'+S.eid).update({listsLocked:on});st.textContent='';S.listDirty=false;S.editing=null}catch(err){e.target.checked=!on;st.textContent=errMsg(err)}e.target.disabled=false});
+
+  render();
+
+  // ---------- auth UI ----------
+  function renderAuth(){const a=$('authbar');if(!a)return;
+    if(!S.fbReady){a.innerHTML='';return}
+    if(!S.uid){a.innerHTML=`<span class="muted">Viewing as a guest.</span><button class="btn small" type="button" id="signInToggle">Sign in to enter results</button>`;return}
+    $('signin').hidden=true;const nm=(S.me&&S.me.name)||(S.authUser&&(S.authUser.displayName||S.authUser.email))||'you';
+    const role=S.isOwner?'<span class="pill live">Organizer</span>':S.canEdit?`<span class="pill W">${S.me&&S.me.pid?esc(pname(S.me.pid)):'Approved'}</span>`:'<span class="pill P">Waiting for approval</span>';
+    a.innerHTML=`<span>Signed in as <b>${esc(nm)}</b></span>${role}<button class="btn small" type="button" id="signOut">Sign out</button>`}
+  async function googleSignIn(){const st=$('authStatus');st.textContent='';const p=new firebase.auth.GoogleAuthProvider();
+    try{await firebase.auth().signInWithPopup(p)}catch(err){if(err&&['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'].includes(err.code)){try{await firebase.auth().signInWithRedirect(p)}catch(e2){st.textContent=authMsg(e2)}}else if(err&&err.code!=='auth/popup-closed-by-user')st.textContent=authMsg(err)}}
+  async function emailAuth(kind){const st=$('authStatus');const em=$('au_email').value.trim(),pw=$('au_pass').value,nm=$('au_name').value.trim();st.textContent='';
+    if(!em){st.textContent='Enter your email.';return}
+    try{if(kind==='emailReset'){await firebase.auth().sendPasswordResetEmail(em);st.textContent='Password reset email sent. Check your inbox.';return}
+      if(!pw){st.textContent='Enter a password.';return}
+      if(kind==='emailUp'){if(!nm){st.textContent='Enter your name so the organizer knows who you are.';return}S.pendingName=nm;const c=await firebase.auth().createUserWithEmailAndPassword(em,pw);try{await c.user.updateProfile({displayName:nm})}catch(e){}}
+      else await firebase.auth().signInWithEmailAndPassword(em,pw)}catch(err){st.textContent=authMsg(err)}}
+  function authMsg(err){const c=err&&err.code||'';
+    if(c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found'||c==='auth/invalid-login-credentials')return 'Wrong email or password. New here? Use Create account.';
+    if(c==='auth/email-already-in-use')return 'That email already has an account. Use Sign in, or Forgot password.';
+    if(c==='auth/weak-password')return 'Use a password with at least 6 characters.';
+    if(c==='auth/invalid-email')return "That email address doesn't look right.";
+    if(c==='auth/unauthorized-domain')return "This web address isn't allowed to sign in yet. The organizer needs to add it in Firebase (Authentication → Settings → Authorized domains).";
+    if(c==='auth/operation-not-allowed')return "That sign-in method isn't turned on yet. The organizer needs to enable it in Firebase.";
+    if(c==='auth/too-many-requests')return 'Too many tries. Wait a minute and try again.';
+    if(c==='auth/network-request-failed')return "Can't reach the sign-in service. Check your connection.";
+    return 'Sign-in failed. Try again.'}
+
+  // ---------- backup ----------
+  const COLLS=['settings','roster','events','games','lists','vault','sealed','users','meta'];
+  async function doExport(){const st=$('backupStatus');st.textContent='Exporting…';
+    try{const out={_format:'crossfire-backup-1',_exported:now()};for(const c of COLLS){const q=await S.db.collection(c).get();out[c]={};q.docs.forEach(d=>out[c][d.id]=d.data())}
+      const blob=new Blob([JSON.stringify(out,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`crossfire-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+      st.textContent='Backup downloaded.'}catch(err){st.textContent=errMsg(err)}}
+  $('importFile').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];const st=$('backupStatus');if(!f)return;
+    try{const data=JSON.parse(await f.text());if(data._format!=='crossfire-backup-1'){st.textContent="That file isn't a Crossfire backup.";return}
+      const writes=[];for(const c of COLLS){if(c==='users'||c==='meta')continue;Object.entries(data[c]||{}).forEach(([id,doc])=>writes.push([c,id,doc]))}
+      st.textContent=`Importing ${writes.length} records…`;for(let i=0;i<writes.length;i+=400){const b=S.db.batch();writes.slice(i,i+400).forEach(([c,id,doc])=>b.set(S.db.doc(c+'/'+id),doc));await b.commit()}
+      st.textContent=`Imported ${writes.length} records. Existing records with the same IDs were replaced.`}catch(err){st.textContent=err instanceof SyntaxError?"That file couldn't be read.":errMsg(err)}e.target.value=''});
+
+  // ---------- live data (Firebase) ----------
+  (async()=>{
+    const cfg=window.FIREBASE_CONFIG||{};
+    if(!window.firebase||!cfg.apiKey||/^PASTE/.test(cfg.apiKey)){banner(window.firebase?'This site isn\'t connected to its database yet. The organizer needs to paste the Firebase config into config.js.':'Couldn\'t load the database library. Check your connection and reload.','warn');return}
+    firebase.initializeApp(cfg);const db=firebase.firestore();try{db.settings({ignoreUndefinedProperties:true,merge:true})}catch(e){}
+    S.db=db;S.fbReady=true;render();
+    const timer=setTimeout(()=>banner('Still loading event data. What you see may be out of date.','warn'),10000);
+    const need=['settings','roster','events','games','lists'];const mark=(k,m)=>{if(m&&!m.fromCache&&!S.loaded[k]){S.loaded[k]=true;if(need.every(n=>S.loaded[n])){clearTimeout(timer);banner('')}}sync()};
+    const onErr=err=>{clearTimeout(timer);banner(err&&err.code==='permission-denied'?'The database refused a request. If you are the organizer, check the security rules are published.':'Lost the connection to event data. Reload to try again.','warn')};
+    const coll=(name,key)=>db.collection(name).onSnapshot(q=>{const o={};q.docs.forEach(d=>o[d.id]=d.data());S[key]=o;render();mark(name,q.metadata)},onErr);
+    db.doc('settings/main').onSnapshot(s=>{if(s.exists)S.settings=Object.assign({localeA:'Locale A',localeB:'Locale B'},s.data());render();mark('settings',s.metadata)},onErr);
+    coll('roster','roster');coll('events','events');coll('games','games');coll('lists','lists');
+    let priv=[],privKey='';const stopPriv=()=>{priv.forEach(u=>{try{u()}catch(e){}});priv=[]};
+    const setSealed=q=>{const raw={};q.docs.forEach(d=>raw[d.id]=d.data());S.sealedRaw=raw;const g={};Object.values(raw).forEach(x=>{if(!x||!x.uid||!x.eid)return;(g[x.uid]=g[x.uid]||{entries:{}}).entries[x.eid]=x});S.sealed=g;renderLists();mark('sealed',q.metadata)};
+    const privErr=err=>{if(err&&err.code==='permission-denied')return;onErr(err)};
+    function refreshPriv(){const key=S.uid?S.uid+'|'+S.isOwner:'';if(key===privKey)return;privKey=key;stopPriv();S.vault={};S.sealed={};S.sealedRaw={};S.users={};S.me=null;S.loaded.vault=S.loaded.sealed=false;render();
+      if(!S.uid)return;
+      priv.push(db.doc('users/'+S.uid).onSnapshot(s=>{S.me=s.exists?s.data():null;render()},privErr));
+      if(S.isOwner){
+        priv.push(db.collection('vault').onSnapshot(q=>{const o={};q.docs.forEach(d=>o[d.id]=d.data());S.vault=o;renderLists();mark('vault',q.metadata)},privErr));
+        priv.push(db.collection('sealed').onSnapshot(setSealed,privErr));
+        priv.push(db.collection('users').onSnapshot(q=>{const o={};q.docs.forEach(d=>o[d.id]=d.data());S.users=o;render()},privErr));
+      }else priv.push(db.collection('sealed').where('uid','==',S.uid).onSnapshot(setSealed,privErr))}
+    db.doc('meta/owner').onSnapshot(s=>{S.ownerUid=s.exists?s.data().uid:null;S.isOwner=!!S.uid&&S.ownerUid===S.uid;
+      if(S.uid&&!S.isOwner&&!S.claimTried){S.claimTried=true;db.doc('meta/owner').set({uid:S.uid}).catch(()=>{})}
+      refreshPriv();render()},onErr);
+    firebase.auth().onAuthStateChanged(async u=>{S.authUser=u;S.uid=u?u.uid:null;S.claimTried=false;S.isOwner=!!u&&S.ownerUid===u.uid;
+      if(u){if(!S.isOwner&&S.ownerUid!==undefined){S.claimTried=true;db.doc('meta/owner').set({uid:u.uid}).catch(()=>{})}
+        try{const ref=db.doc('users/'+u.uid);const cur=await ref.get();const nm=S.pendingName||u.displayName||'';
+          if(!cur.exists)await ref.set({name:nm,email:u.email||'',createdAt:now()});
+          else{const x=cur.data();const up={};if(nm&&x.name!==nm)up.name=nm;if((u.email||'')!==(x.email||''))up.email=u.email||'';if(Object.keys(up).length)await ref.update(up)}}catch(e){}
+        S.pendingName=null}
+      refreshPriv();render()});
+    firebase.auth().getRedirectResult().catch(err=>{const st=$('authStatus');if(st)st.textContent=authMsg(err)});
+  })();
+})();
+</script>
+</body>
+</html>
