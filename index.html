@@ -160,6 +160,7 @@ input[type=email],input[type=password]{font:inherit;color:var(--fg);background:v
 .rstar{color:var(--b);font-family:var(--mono);font-weight:700;font-size:1.15rem;margin-left:3px;letter-spacing:.05em}
 .fxpick label{flex:1 1 140px;min-width:0}
 .disp{font-family:var(--display);font-weight:600;font-size:.95rem;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);line-height:1.2;margin:2px 0}
+.nppick{border-bottom:1px dashed var(--line);padding-bottom:8px}
 .rickypick{border-top:1px dashed var(--line);padding-top:8px}
 .rdq{flex-basis:100%;color:var(--muted);font-size:.9rem}
 .steps{margin:0;padding-left:24px;display:grid;gap:10px;max-width:70ch}
@@ -305,7 +306,7 @@ input[type=email],input[type=password]{font:inherit;color:var(--fg);background:v
     <div class="panel rulesbox">
       <div class="panel-head"><h2>How rankings work</h2><span class="muted">Applied in this order. Each step is only used if players are still tied.</span></div>
       <ol class="steps">
-        <li><b>Record.</b> Win = 3 points, draw = 1, loss = 0. Most points ranks highest. A win is worth three draws, so playing for the win pays off.</li>
+        <li><b>Record.</b> Win = 3 points, draw = 1, loss = 0. Most points ranks highest. A win is worth three draws, so playing for the win pays off. Games marked <i>Not played</i> count for nothing: no points, no margin, and no effect on anyone's quality of wins.</li>
         <li><b>Head-to-head.</b> If exactly two players are tied and they played each other, the winner of that game ranks higher.</li>
         <li><b>Quality of wins.</b> Add up the final record points of every opponent you <i>beat</i>, plus half for any opponent you drew. Beating stronger opponents counts for more. <span class="hl">No VP or margins are used in this step.</span></li>
         <li><b>Capped margin.</b> Your VP margin in each game, capped at &plusmn;20, added together. A close win still beats a loss, but a 60-point blowout counts the same as a 20-point win. This keeps armies that naturally run up the score from winning ties on that alone.</li>
@@ -491,7 +492,10 @@ input[type=email],input[type=password]{font:inherit;color:var(--fg);background:v
   const tablesOf=(e,r)=>((e&&e.schedule&&e.schedule['r'+r])||[]);
   const gid=(eid,r,t)=>`${eid}_r${r}t${t}`;
   const lkey=(eid,p)=>`${eid}_${p}`;
-  function result(d){if(!d||typeof d.aVP!=='number'||typeof d.bVP!=='number')return null;return{a:d.aVP,b:d.bVP}}
+  function result(d){if(!d||d.status==='unplayed'||typeof d.aVP!=='number'||typeof d.bVP!=='number')return null;return{a:d.aVP,b:d.bVP}}
+  const unplayed=d=>!!(d&&d.status==='unplayed');
+  const counted=gs=>gs.filter(g=>!unplayed(g.doc));
+  const npNote=gs=>{const k=gs.length-counted(gs).length;return k?` · ${k} not played`:''};
   function eventGames(eid){const e=S.events[eid];const out=[];for(let r=1;r<=rounds(e);r++)tablesOf(e,r).forEach((t,i)=>{if(t.a&&t.b){const id=gid(eid,r,i+1);out.push({id,round:r,table:i+1,a:t.a,b:t.b,doc:S.games[id]})}});return out}
   function sortedEvents(){return Object.entries(S.events).map(([id,e])=>({id,...e})).sort((x,y)=>String(y.date||'').localeCompare(String(x.date||''))||String(y.createdAt||'').localeCompare(String(x.createdAt||'')))}
   function pickDefault(){if(S.eid&&S.events[S.eid])return;const c=S.settings.currentEvent;if(c&&S.events[c]){S.eid=c;return}const l=sortedEvents();S.eid=l.length?l[0].id:null}
@@ -533,7 +537,7 @@ input[type=email],input[type=password]{font:inherit;color:var(--fg);background:v
     const pl=evPlayers(e);$('evSize').textContent=e?`${rounds(e)} rounds · ${pl.A.length} v ${pl.B.length}`:'';
     $('sA').textContent=LN('A');$('sB').textContent=LN('B');
     let wa=0,wb=0,va=0,vb=0,n=0;const gs=e?eventGames(S.eid):[];gs.forEach(g=>{const r=result(g.doc);if(!r)return;n++;va+=r.a;vb+=r.b;if(r.a>r.b)wa++;else if(r.b>r.a)wb++;else{wa+=.5;wb+=.5}});
-    $('wA').textContent=fmt(wa);$('wB').textContent=fmt(wb);$('scoreSub').textContent=`Game wins · ${n} of ${gs.length} played · VP ${va}–${vb}`;
+    $('wA').textContent=fmt(wa);$('wB').textContent=fmt(wb);$('scoreSub').textContent=`Game wins · ${n} of ${counted(gs).length} played${npNote(gs)} · VP ${va}–${vb}`;
   }
   const faction=p=>{const l=S.lists[lkey(S.eid,p)];return l&&l.faction?l.faction:''};
   const dispOf=p=>{const l=S.lists[lkey(S.eid,p)];return l&&l.disposition?l.disposition:''};
@@ -546,16 +550,18 @@ input[type=email],input[type=password]{font:inherit;color:var(--fg);background:v
     if(!e||!pl.A.length||!pl.B.length){$('cross').innerHTML='<tbody><tr><td class="empty" style="border:0">No players or pairings set for this event yet.</td></tr></tbody>'}
     else{const gs=eventGames(S.eid);let h='<thead><tr><th scope="col"></th>'+pl.B.map(b=>`<th scope="col" class="xb">${pcell(b)}</th>`).join('')+'</tr></thead><tbody>';
       pl.A.forEach(a=>{h+=`<tr><th scope="row" class="xa">${pcell(a)}</th>`;pl.B.forEach(b=>{const g=gs.find(x=>x.a===a&&x.b===b);
-        if(!g){h+='<td><span class="muted">—</span></td>';return}const r=result(g.doc);let pill='<span class="pill P">Pending</span>',sc='';
+        if(!g){h+='<td><span class="muted">—</span></td>';return}const r=result(g.doc);let pill=unplayed(g.doc)?'<span class="pill P">Not played</span>':'<span class="pill P">Pending</span>',sc='';
         if(r){const k=r.a>r.b?'W':r.a<r.b?'L':'D';pill=`<span class="pill ${k}">${k==='D'?'Draw':esc(pname(k==='W'?a:b).split(' ')[0])+' win'}</span>`;sc=`<span class="res">${r.a}–${r.b}</span>`}
         h+=`<td><div class="cell"><span class="rd">R${g.round}${e.showTables?' · T'+g.table:''}</span>${sc}${pill}</div></td>`});h+='</tr>'});$('cross').innerHTML=h+'</tbody>'}
     const n=e&&e.notes;$('notes').innerHTML=n?esc(n).replace(/\n/g,'<br>'):'No notes yet.';$('notes').classList.toggle('muted',!n);
   }
 
   const fxOpts=v=>`<option value="">Not recorded</option>`+Object.keys(FX).sort().map(f=>`<option value="${esc(f)}" ${f===v?'selected':''}>${esc(f)}</option>`).join('')+(v&&!FX[v]?`<option selected value="${esc(v)}">${esc(v)}</option>`:'');
-  function renderPairings(){const keep=$('in_a')?{a:$('in_a').value,b:$('in_b').value,fa:$('fa').checked,fb:$('fb').checked,ra:$('ra').checked,rb:$('rb').checked,xa:$('fxa')&&$('fxa').value,xb:$('fxb')&&$('fxb').value,id:S.editing}:null;
-    renderPairingsInner();
-    if(keep&&keep.id===S.editing&&$('in_a')){$('in_a').value=keep.a;$('in_b').value=keep.b;$('fa').checked=keep.fa;$('fb').checked=keep.fb;$('ra').checked=keep.ra;$('rb').checked=keep.rb;if($('fxa')&&keep.xa)$('fxa').value=keep.xa;if($('fxb')&&keep.xb)$('fxb').value=keep.xb}}
+  function npSync(){const np=$('np');if(!np)return;['in_a','in_b','fa','fb','ra','rb','fxa','fxb'].forEach(i=>{const el=$(i);if(el)el.disabled=np.checked})}
+  document.addEventListener('change',e=>{if(e.target&&e.target.id==='np')npSync()});
+  function renderPairings(){const keep=$('in_a')?{a:$('in_a').value,b:$('in_b').value,fa:$('fa').checked,fb:$('fb').checked,ra:$('ra').checked,rb:$('rb').checked,np:$('np').checked,xa:$('fxa')&&$('fxa').value,xb:$('fxb')&&$('fxb').value,id:S.editing}:null;
+    renderPairingsInner();npSync();
+    if(keep&&keep.id===S.editing&&$('in_a')){$('in_a').value=keep.a;$('in_b').value=keep.b;$('fa').checked=keep.fa;$('fb').checked=keep.fb;$('ra').checked=keep.ra;$('rb').checked=keep.rb;$('np').checked=keep.np;npSync();if($('fxa')&&keep.xa)$('fxa').value=keep.xa;if($('fxb')&&keep.xb)$('fxb').value=keep.xb}}
   function renderPairingsInner(){const e=ev();const R=rounds(e);if(S.round>R)S.round=Math.max(1,R);
     $('roundTabs').innerHTML=Array.from({length:R},(_,i)=>`<button type="button" data-round="${i+1}" aria-pressed="${S.round===i+1}">Round ${i+1}</button>`).join('');
     const m=e&&e.missions&&e.missions['r'+S.round];$('missionLine').hidden=!m;$('missionLine').innerHTML=m?`<span class="ml">Round ${S.round} mission</span><span class="mn">${esc(m)}</span>`:'';
@@ -565,10 +571,10 @@ input[type=email],input[type=password]{font:inherit;color:var(--fg);background:v
       const id=gid(S.eid,S.round,tn);const d=S.games[id];const r=result(d);const editing=S.editing===id;let mid;
       if(editing){mid=`<div class="entry"><input type="number" min="0" max="200" inputmode="numeric" id="in_a" placeholder="VP" value="${d&&d.aVP!=null?d.aVP:''}" aria-label="${esc(pname(t.a))} VP"><span class="muted">–</span><input type="number" min="0" max="200" inputmode="numeric" id="in_b" placeholder="VP" value="${d&&d.bVP!=null?d.bVP:''}" aria-label="${esc(pname(t.b))} VP"></div>`}
       else if(r)mid=`<div class="vp ${r.a>r.b?'win-a':r.b>r.a?'win-b':''}"><span class="va">${r.a}</span><span class="muted"> – </span><span class="vb">${r.b}</span></div>`;
-      else mid='<span class="pill P">Not reported</span>';
+      else mid=unplayed(d)?'<span class="pill P">Not played</span>':'<span class="pill P">Not reported</span>';
       const rd=' <span class="rdice">Ricky Dice</span>';const fa=(d&&d.first==='a'?' <span class="first">1st</span>':'')+(d&&d.rickyA&&!editing?rd:''),fb=(d&&d.rickyB&&!editing?rd+' ':'')+(d&&d.first==='b'?' <span class="first">1st</span>':'');
-      let extra='';if(editing){const f=d&&d.first;extra=`<div class="firstpick"><label class="chk"><input type="checkbox" id="fa" ${f==='a'?'checked':''}>${esc(pname(t.a))} went first</label><label class="chk"><input type="checkbox" id="fb" ${f==='b'?'checked':''}>${esc(pname(t.b))} went first</label></div>${(!faction(t.a)||!faction(t.b))?`<div class="firstpick fxpick"><span class="rdq">Factions played (for history)</span>${!faction(t.a)?`<label>${esc(pname(t.a))}<select id="fxa">${fxOpts(d&&d.aFaction)}</select></label>`:''}${!faction(t.b)?`<label>${esc(pname(t.b))}<select id="fxb">${fxOpts(d&&d.bFaction)}</select></label>`:''}</div>`:''}<div class="firstpick rickypick"><span class="rdq">Did anyone use Ricky Dice?</span><label class="chk"><input type="checkbox" id="ra" ${d&&d.rickyA?'checked':''}>${esc(pname(t.a))} used Ricky Dice</label><label class="chk"><input type="checkbox" id="rb" ${d&&d.rickyB?'checked':''}>${esc(pname(t.b))} used Ricky Dice</label></div>`}
-      let foot='';if(S.canEdit){foot=editing?`<div class="game-foot"><span class="status" id="gst"></span><button class="btn" type="button" data-cancel="1">Cancel</button>${r?`<button class="btn danger" type="button" data-clear="${id}">Clear</button>`:''}<button class="btn primary" type="button" data-save="${id}" data-a="${esc(t.a)}" data-b="${esc(t.b)}" data-r="${S.round}" data-t="${tn}">Save result</button></div>`:`<div class="game-foot"><button class="btn" type="button" data-edit="${id}">${r?'Edit result':'Enter result'}</button></div>`}
+      let extra='';if(editing){const f=d&&d.first;extra=`<div class="firstpick nppick"><label class="chk"><input type="checkbox" id="np" ${unplayed(d)?'checked':''}>Game not played: no result, counts for nothing</label></div><div class="firstpick"><label class="chk"><input type="checkbox" id="fa" ${f==='a'?'checked':''}>${esc(pname(t.a))} went first</label><label class="chk"><input type="checkbox" id="fb" ${f==='b'?'checked':''}>${esc(pname(t.b))} went first</label></div>${(!faction(t.a)||!faction(t.b))?`<div class="firstpick fxpick"><span class="rdq">Factions played (for history)</span>${!faction(t.a)?`<label>${esc(pname(t.a))}<select id="fxa">${fxOpts(d&&d.aFaction)}</select></label>`:''}${!faction(t.b)?`<label>${esc(pname(t.b))}<select id="fxb">${fxOpts(d&&d.bFaction)}</select></label>`:''}</div>`:''}<div class="firstpick rickypick"><span class="rdq">Did anyone use Ricky Dice?</span><label class="chk"><input type="checkbox" id="ra" ${d&&d.rickyA?'checked':''}>${esc(pname(t.a))} used Ricky Dice</label><label class="chk"><input type="checkbox" id="rb" ${d&&d.rickyB?'checked':''}>${esc(pname(t.b))} used Ricky Dice</label></div>`}
+      let foot='';if(S.canEdit){foot=editing?`<div class="game-foot"><span class="status" id="gst"></span><button class="btn" type="button" data-cancel="1">Cancel</button>${r||unplayed(d)?`<button class="btn danger" type="button" data-clear="${id}">Clear</button>`:''}<button class="btn primary" type="button" data-save="${id}" data-a="${esc(t.a)}" data-b="${esc(t.b)}" data-r="${S.round}" data-t="${tn}">Save result</button></div>`:`<div class="game-foot"><button class="btn" type="button" data-edit="${id}">${r?'Edit result':'Enter result'}</button></div>`}
       return `<article class="game${editing?' editing':''}${e.showTables?'':' notbl'}">${e.showTables?`<div class="tbl">Table<b>${tn}</b></div>`:''}
         <div class="pl"><div class="nm"><span class="ca">${esc(pname(t.a))}</span>${fa}</div>${dtag(dispOf(t.a)||(d&&d.aDisp))}<div class="fx">${esc(faction(t.a)||(d&&d.aFaction)||(e.past?'Faction not recorded':'List hidden or not in'))}</div></div>
         <div class="mid">${mid}</div>
@@ -578,7 +584,7 @@ input[type=email],input[type=password]{font:inherit;color:var(--fg);background:v
   function renderStandings(){const e=ev();if(!e){$('stand').innerHTML='';$('standSub').textContent='';$('tbDetails').innerHTML='';return}
     const st=stats(S.eid);const arr=rank(st);const gs=eventGames(S.eid);const anyBye=arr.some(x=>x.byes);const played=gs.filter(g=>result(g.doc)).length;
     const pl=evPlayers(e);const locOf=p=>pl.A.includes(p)?'a':'b';const sg=n=>(n>0?'+':'')+fmt(n);
-    $('standSub').textContent=played?`${played} of ${gs.length} games reported`:'No results yet';
+    $('standSub').textContent=played?`${played} of ${counted(gs).length} games reported${npNote(gs)}`:'No results yet';
     $('stand').innerHTML='<thead><tr><th>#</th><th>Player</th><th>W-D-L</th><th>Pts</th><th title="Quality of wins">Quality</th><th title="Capped margin">Margin</th>'+(anyBye?'<th>Byes</th>':'')+'</tr></thead><tbody>'+
       (arr.length?arr.map(x=>`<tr class="${x.place===1&&played?'first-place':''}"><td class="rank num">${x.place}${x.shared?'=':''}</td><td><b class="c${locOf(x.p)}">${esc(pname(x.p))}</b>${x.rk?`<span class="rstar" title="Accused of Ricky Dice ${x.rk} time${x.rk>1?'s':''}">${'*'.repeat(x.rk)}</span>`:''}${faction(x.p)?`<div class="tb">${esc(faction(x.p))}</div>`:''}${x.shared&&x.played?'<div class="tb tbtag">Tied after every step</div>':x.tb&&x.played?`<div class="tb tbtag">Tie decided by: ${esc(x.tb)}</div>`:''}</td><td class="num">${x.W}-${x.D}-${x.L}</td><td class="num">${fmt(x.pts)}</td><td class="num">${fmt(x.qow)}</td><td class="num">${sg(x.cap)}</td>${anyBye?`<td class="num">${x.byes}</td>`:''}</tr>`).join(''):'<tr><td colspan="7" class="empty">No players in this event yet.</td></tr>')+'</tbody>';
     const resWord=r=>r===1?'<span class="pill W">Win</span>':r===0?'<span class="pill L">Loss</span>':'<span class="pill D">Draw</span>';
@@ -706,7 +712,7 @@ input[type=email],input[type=password]{font:inherit;color:var(--fg);background:v
       (rows.length?rows.map(x=>{const loc=S.roster[x.p]?S.roster[x.p].locale:'';const aw=x.wins.length?x.wins.reduce((a,b)=>a+b,0)/x.wins.length:null;
         return `<tr><td><b class="${loc?'c'+loc.toLowerCase():''}">${esc(pname(x.p))}</b></td><td class="num hide-sm">${x.G}</td><td class="num">${sg(Math.round(x.tot/x.G*10)/10)}</td><td class="num">${aw===null?'—':'+'+fmt(Math.round(aw*10)/10)}</td><td class="num hide-sm">${sg(x.tot)}</td><td class="num hide-sm">${sg(x.big)}</td><td class="num">${x.big20}</td></tr>`}).join(''):'<tr><td colspan="7" class="empty">No completed games yet.</td></tr>')+'</tbody>'}
   function renderTrophy(){
-    const done=sortedEvents().filter(x=>{const gs=eventGames(x.id);const n=gs.filter(g=>result(g.doc)).length;return n&&(x.status==='complete'||n===gs.length)});
+    const done=sortedEvents().filter(x=>{const gs=eventGames(x.id);const n=gs.filter(g=>result(g.doc)).length;return n&&(x.status==='complete'||n===counted(gs).length)});
     const e=done[0];if(!e){$('trophy').innerHTML='<div class="eyebrow">Current trophy holder</div><div class="tname muted">Up for grabs</div><div class="tsub">The winner of the most recent completed event holds the trophy.</div>';return}
     const st=stats(e.id);const arr=rank(st);const champs=arr.filter(x=>x.place===1);const c=champs[0];const pl=evPlayers(e);
     let wa=0,wb=0;eventGames(e.id).forEach(g=>{const r=result(g.doc);if(!r)return;if(r.a>r.b)wa++;else if(r.b>r.a)wb++;else{wa+=.5;wb+=.5}});
@@ -791,11 +797,13 @@ input[type=email],input[type=password]{font:inherit;color:var(--fg);background:v
     if(d.edit){S.editing=d.edit;renderPairings();const i=$('in_a');i&&i.focus();return}
     if(d.editlist){S.editing='list_'+d.editlist;renderLists();return}
     if(d.cancel){S.editing=null;S.listDirty=false;render();return}
+    if(d.save&&$('np')&&$('np').checked){const st=$('gst');const e2=ev();t.disabled=true;st.textContent='Saving…';
+      try{await S.db.doc('games/'+d.save).set({event:S.eid,round:+d.r,table:+d.t,a:d.a,b:d.b,status:'unplayed',aVP:null,bVP:null,first:null,rickyA:false,rickyB:false,date:(e2&&e2.date)||null,updatedAt:now()});S.editing=null;render()}catch(err){st.textContent=errMsg(err);t.disabled=false}return}
     if(d.save){const a=$('in_a').value,b=$('in_b').value;const st=$('gst');
       if(a===''||b===''||isNaN(+a)||isNaN(+b)||+a<0||+b<0){st.textContent='Enter both VP scores (0 or more).';return}
       const fa=$('fa').checked,fb=$('fb').checked;if(fa&&fb){st.textContent='Only one player can go first.';return}
       const e2=ev();t.disabled=true;st.textContent='Saving…';
-      try{await S.db.doc('games/'+d.save).set({event:S.eid,round:+d.r,table:+d.t,a:d.a,b:d.b,aVP:+a,bVP:+b,first:fa?'a':fb?'b':null,rickyA:$('ra').checked,rickyB:$('rb').checked,aFaction:faction(d.a)||($('fxa')&&$('fxa').value)||null,bFaction:faction(d.b)||($('fxb')&&$('fxb').value)||null,aDisp:dispOf(d.a)||null,bDisp:dispOf(d.b)||null,date:(e2&&e2.date)||null,updatedAt:now()});S.editing=null;render()}catch(err){st.textContent=errMsg(err);t.disabled=false}return}
+      try{await S.db.doc('games/'+d.save).set({event:S.eid,round:+d.r,table:+d.t,a:d.a,b:d.b,aVP:+a,bVP:+b,status:'played',first:fa?'a':fb?'b':null,rickyA:$('ra').checked,rickyB:$('rb').checked,aFaction:faction(d.a)||($('fxa')&&$('fxa').value)||null,bFaction:faction(d.b)||($('fxb')&&$('fxb').value)||null,aDisp:dispOf(d.a)||null,bDisp:dispOf(d.b)||null,date:(e2&&e2.date)||null,updatedAt:now()});S.editing=null;render()}catch(err){st.textContent=errMsg(err);t.disabled=false}return}
     if(d.clear){t.disabled=true;try{await S.db.doc('games/'+d.clear).delete();S.editing=null;render()}catch(err){$('gst').textContent=errMsg(err);t.disabled=false}return}
     if(d.savelist){const e2=ev();if(e2&&e2.listsLocked){S.editing=null;S.listDirty=false;render();return}const p=d.savelist;const st=$('lst');
       const ar=readArmy('l');const er=armyError(ar);if(er){st.textContent=er;return}const body={pid:p,...ar,text:$('l_t').value,updatedAt:now()};
